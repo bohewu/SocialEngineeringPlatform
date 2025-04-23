@@ -1,0 +1,80 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.LandingPageTemplates.DeleteModel
+
+@{
+    ViewData["Title"] = "刪除登陸頁範本";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* 根據後端檢查結果顯示不同的警告訊息 *@
+@if (Model.CanDelete)
+{
+    <h3 class="text-danger">您確定要刪除這個登陸頁範本嗎？</h3>
+}
+else
+{
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">無法刪除！</h4>
+        <p>@Model.DeletionWarningMessage</p>
+        <hr>
+        <p class="mb-0">請先前往「演練活動」管理頁面，修改或刪除使用此範本的活動。</p>
+    </div>
+}
+
+<div>
+    <h4>登陸頁範本</h4>
+    <hr />
+    @* 顯示要刪除的資料 *@
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LandingPageTemplate.Name)
+        </dd>
+         <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.CreatedByUser)
+        </dt>
+        <dd class = "col-sm-10">
+             @(Model.LandingPageTemplate.CreatedByUser?.Email ?? "N/A")
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.CollectFieldsConfig)
+        </dt>
+        <dd class = "col-sm-10">
+            <pre style="white-space: pre-wrap; word-wrap: break-word;">@Html.DisplayFor(model => model.LandingPageTemplate.CollectFieldsConfig)</pre>
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.CreateTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.LandingPageTemplate.CreateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.UpdateTime)
+        </dt>
+        <dd class = "col-sm-10">
+             @Model.LandingPageTemplate.UpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+         @* 可以選擇性顯示 HTML Content 的預覽或摘要 *@
+         <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.HtmlContent)
+        </dt>
+        <dd class = "col-sm-10">
+             <textarea class="form-control" rows="5" readonly>@Model.LandingPageTemplate.HtmlContent</textarea>
+        </dd>
+    </dl>
+
+    @* 刪除確認表單 *@
+    <form method="post">
+        <input type="hidden" asp-for="LandingPageTemplate.Id" />
+         @* 如果 CanDelete 為 true 才顯示刪除按鈕 *@
+        @if (Model.CanDelete)
+        {
+            <button type="submit" class="btn btn-danger">確認刪除</button> @:|
+        }
+        <a asp-page="./Index" class="btn btn-secondary ms-2">返回列表</a>
+    </form>
+</div>

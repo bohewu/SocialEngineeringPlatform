@@ -1,0 +1,25 @@
+﻿@page "/Track/Submit"
+@model SocialEngineeringPlatform.Web.Pages.TrackSubmitModel
+@{
+    Layout = null; // 可以使用共用版面，或者設為 null 顯示極簡頁面
+    ViewData["Title"] = "操作結果";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            根據需要顯示不同的圖示或樣式
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <i class="fas fa-info-circle fa-3x text-info mb-3"></i>
+
+            <h2>操作結果</h2>
+            <p class="lead">@Model.ResponseMessage</p>
+            <hr>
+            <p>
+                您可以關閉此頁面。
+                或者提供返回首頁的連結
+                <a asp-page="/Index" class="btn btn-primary">返回首頁</a>
+            </p>
+        </div>
+    </div>
+</div>

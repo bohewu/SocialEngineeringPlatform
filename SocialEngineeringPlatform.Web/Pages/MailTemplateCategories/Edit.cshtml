@@ -1,0 +1,45 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.MailTemplateCategories.EditModel
+
+@{
+    ViewData["Title"] = "編輯範本分類";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>範本分類</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* 隱藏欄位，儲存要編輯的 Id *@
+            <input type="hidden" asp-for="MailTemplateCategory.Id" />
+
+            @* 分類名稱欄位 *@
+            <div class="mb-3">
+                <label asp-for="MailTemplateCategory.Name" class="form-label"></label>
+                <input asp-for="MailTemplateCategory.Name" class="form-control" />
+                <span asp-validation-for="MailTemplateCategory.Name" class="text-danger"></span>
+            </div>
+
+            @* 描述欄位 *@
+            <div class="mb-3">
+                <label asp-for="MailTemplateCategory.Description" class="form-label"></label>
+                <textarea asp-for="MailTemplateCategory.Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="MailTemplateCategory.Description" class="text-danger"></span>
+            </div>
+
+            @* 提交與返回按鈕 *@
+            <div class="mb-3">
+                <button type="submit" class="btn btn-success">儲存</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">返回列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

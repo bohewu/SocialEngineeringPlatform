@@ -1,0 +1,137 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.Campaigns.EditModel
+
+@{
+    ViewData["Title"] = "編輯演練活動";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>演練活動</h4>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* 隱藏欄位，儲存要編輯的 Id *@
+            <input type="hidden" asp-for="Campaign.Id" />
+            @* 建立者 ID 和建立時間不應被修改 *@
+            @* <input type="hidden" asp-for="Campaign.CreatedByUserId" /> *@
+            @* <input type="hidden" asp-for="Campaign.CreateTime" /> *@
+
+            @* 活動名稱 *@
+            <div class="mb-3">
+                <label asp-for="Campaign.Name" class="form-label"></label>
+                <input asp-for="Campaign.Name" class="form-control" />
+                <span asp-validation-for="Campaign.Name" class="text-danger"></span>
+            </div>
+
+            @* 描述 *@
+            <div class="mb-3">
+                <label asp-for="Campaign.Description" class="form-label"></label>
+                <textarea asp-for="Campaign.Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Campaign.Description" class="text-danger"></span>
+            </div>
+
+            @* 郵件範本 (下拉選單 - 必選) *@
+            <div class="mb-3">
+                <label asp-for="Campaign.MailTemplateId" class="form-label"></label>
+                <select asp-for="Campaign.MailTemplateId" class="form-select" asp-items="Model.MailTemplateSL">
+                    <option value="">-- 請選擇郵件範本 --</option>
+                </select>
+                <span asp-validation-for="Campaign.MailTemplateId" class="text-danger"></span>
+            </div>
+
+            @* 登陸頁範本 (下拉選單 - 可選) *@
+            <div class="mb-3">
+                <label asp-for="Campaign.LandingPageTemplateId" class="form-label"></label>
+                <select asp-for="Campaign.LandingPageTemplateId" class="form-select" asp-items="Model.LandingPageTemplateSL">
+                    <option value="">-- 無 (或選擇登陸頁範本) --</option>
+                </select>
+                <span asp-validation-for="Campaign.LandingPageTemplateId" class="text-danger"></span>
+            </div>
+            
+            @* *** 新增：目標群組 (下拉選單 - 可選) *** *@
+            <div class="mb-3">
+                <label asp-for="Campaign.TargetGroupId" class="form-label"></label>
+                <select asp-for="Campaign.TargetGroupId" class="form-select" asp-items="Model.TargetGroupSL">
+                    <option value="">-- 不指定群組 (手動管理目標) --</option>
+                </select>
+                <span asp-validation-for="Campaign.TargetGroupId" class="text-danger"></span>
+                <div class="form-text">選擇一個群組將在發送時自動包含該群組成員。若不選擇，請使用「管理目標對象」頁面手動加入。</div>
+            </div>
+
+            @* 狀態 (下拉選單) *@
+            <div class="mb-3">
+                <label asp-for="Campaign.Status" class="form-label"></label>
+                <select asp-for="Campaign.Status" class="form-select" asp-items="Model.StatusSL">
+                    @* 不需要空選項，因為狀態是必填 *@
+                </select>
+                <span asp-validation-for="Campaign.Status" class="text-danger"></span>
+            </div>
+
+            @* 預定發送時間 *@
+            <div class="mb-3">
+                <label asp-for="Campaign.ScheduledSendTime" class="form-label"></label>
+                <input asp-for="Campaign.ScheduledSendTime" class="form-control" type="datetime-local" />
+                <span asp-validation-for="Campaign.ScheduledSendTime" class="text-danger"></span>
+            </div>
+
+            @* 自動發送 (核取方塊) *@
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" asp-for="Campaign.IsAutoSend" />
+                <label class="form-check-label" asp-for="Campaign.IsAutoSend"></label>
+                <span asp-validation-for="Campaign.IsAutoSend" class="text-danger"></span>
+            </div>
+
+            @* 批次間隔(秒) *@
+            <div class="mb-3">
+                <label asp-for="Campaign.SendBatchDelaySeconds" class="form-label"></label>
+                <input asp-for="Campaign.SendBatchDelaySeconds" class="form-control" type="number" min="0" />
+                <span asp-validation-for="Campaign.SendBatchDelaySeconds" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" asp-for="Campaign.TrackOpens" />
+                <label class="form-check-label" asp-for="Campaign.TrackOpens"></label>
+                <span asp-validation-for="Campaign.TrackOpens" class="text-danger"></span>
+                <div class="form-text">勾選此項以啟用此活動的郵件開啟追蹤 (使用隱藏像素)。</div>
+            </div>
+
+            @* 顯示唯讀資訊 *@
+             <div class="mb-3">
+                 <label class="form-label">建立者</label>
+                 @* 需要在 PageModel 的 OnGetAsync 中載入 CreatedByUser 才能顯示 Email *@
+                 <input class="form-control" value="@(Model.Campaign.CreatedByUser?.Email ?? "N/A")" readonly />
+             </div>
+             <div class="mb-3">
+                <label asp-for="Campaign.CreateTime" class="form-label"></label>
+                <input asp-for="Campaign.CreateTime" class="form-control" readonly />
+            </div>
+             <div class="mb-3">
+                <label asp-for="Campaign.UpdateTime" class="form-label"></label>
+                <input asp-for="Campaign.UpdateTime" class="form-control" readonly />
+            </div>
+             <div class="mb-3">
+                <label asp-for="Campaign.ActualStartTime" class="form-label"></label>
+                <input class="form-control" value="@(Model.Campaign.ActualStartTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "尚未開始")" readonly />
+            </div>
+             <div class="mb-3">
+                <label asp-for="Campaign.EndTime" class="form-label"></label>
+                <input class="form-control" value="@(Model.Campaign.EndTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "尚未結束")" readonly />
+            </div>
+
+
+            @* 提交與返回按鈕 *@
+            <div class="mb-3">
+                <button type="submit" class="btn btn-success">儲存</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">返回列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

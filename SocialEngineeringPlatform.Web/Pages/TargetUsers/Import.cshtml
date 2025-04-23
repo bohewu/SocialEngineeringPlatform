@@ -1,0 +1,75 @@
+﻿@page
+@model SocialEngineeringPlatform.Web.Pages.TargetUsers.ImportModel
+
+@{
+    ViewData["Title"] = "匯入目標使用者";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+@* 修改說明文字以匹配中文標頭 *@
+<p>請上傳包含目標使用者資訊的 CSV 檔案。檔案應包含標頭行，欄位應為：電子郵件 (必填), 姓名, 所屬群組名稱, 自訂欄位1(員編),
+    自訂欄位2(身分證)。</p>
+@* 下載樣板連結 *@
+<p>
+    <a asp-page-handler="DownloadTemplate" class="btn btn-outline-secondary btn-sm">
+        <i class="fa fa-download"></i> @* Font Awesome 圖示 (需引入) *@
+        下載 CSV 樣板
+    </a>
+</p>
+<hr/>
+
+<div class="row">
+    <div class="col-md-6">
+        @* 文件上傳表單 *@
+        <form method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="UploadedFile" class="form-label">選擇 CSV 檔案</label>
+                <input asp-for="UploadedFile" type="file" class="form-control" accept=".csv"/>
+                <span asp-validation-for="UploadedFile" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">開始匯入</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">返回列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@* 顯示匯入失敗的詳細資訊 *@
+@if (Model.ImportAttempted && Model.FailedRows.Any())
+{
+    <div class="mt-4">
+        <h4>匯入失敗詳情 (@Model.FailCount 筆)</h4>
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-sm table-danger table-striped">
+                <thead>
+                <tr>
+                    <th>行號</th>
+                    <th>Email</th>
+                    <th>姓名</th>
+                    <th>錯誤訊息</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.FailedRows)
+                {
+                    <tr>
+                        <td>@row.RowNumber</td>
+                        <td>@row.Email</td>
+                        <td>@row.Name</td>
+                        <td>@string.Join("; ", row.Errors)</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    @* 可以在這裡加入 Font Awesome 的引用 (如果 _Layout.cshtml 沒有的話) *@
+    @* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> *@
+}

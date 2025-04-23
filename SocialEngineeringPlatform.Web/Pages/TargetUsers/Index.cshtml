@@ -1,0 +1,91 @@
+﻿@page
+@model SocialEngineeringPlatform.Web.Pages.TargetUsers.IndexModel
+
+@{
+    ViewData["Title"] = "目標使用者列表";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-page="Create" class="btn btn-primary">建立新使用者</a>
+    @* *** 新增：匯入使用者連結 *** *@
+    <a asp-page="./Import" class="btn btn-secondary ms-2">匯入使用者</a>
+</p>
+<table id="targetUsersTable" class="table table-striped table-bordered" style="width:100%">
+    <thead>
+    <tr>
+        <th>
+            @* 使用模型 DisplayName 或直接寫中文 *@
+            @Html.DisplayNameFor(model => model.TargetUser[0].Email)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TargetUser[0].Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TargetUser[0].Group) @* 顯示關聯的群組名稱 *@
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.TargetUser[0].IsActive)
+        </th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.TargetUser) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @* 顯示關聯的 Group 名稱，如果 Group 為 null 則顯示 "N/A" *@
+                @(item.Group?.Name ?? "N/A")
+            </td>
+            <td>
+                @* 將布林值顯示為 是/否 *@
+                @(item.IsActive ? "是" : "否")
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">編輯</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">詳細</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">刪除</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section Scripts {
+    @{
+        // await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    @* 引用 DataTables.net 的 CSS *@
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.css"/>
+
+    @* 引用 DataTables.net 的 JS *@
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#targetUsersTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/2.0.5/i18n/zh-HANT.json"
+                },
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "responsive": true,
+                // 可以針對特定欄位禁用排序，例如 "操作" 欄
+                "columnDefs": [
+                    { "orderable": false, "targets": 4 } // 第 5 欄 (索引從 0 開始) 不允許排序
+                ]
+            });
+        });
+    </script>
+}

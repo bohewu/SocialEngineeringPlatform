@@ -1,0 +1,92 @@
+﻿@page "{id}"
+@model SocialEngineeringPlatform.Web.Pages.Admin.Users.EditModel
+@{
+    ViewData["Title"] = "編輯使用者";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>使用者：@Model.Input.UserName</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            @* 隱藏欄位傳遞 ID *@
+            <input type="hidden" asp-for="Input.Id" />
+
+            @* 使用者名稱 (通常建議設為唯讀或謹慎修改) *@
+            <div class="mb-3">
+                <label asp-for="Input.UserName" class="form-label"></label>
+                <input asp-for="Input.UserName" class="form-control" />
+                <span asp-validation-for="Input.UserName" class="text-danger"></span>
+            </div>
+
+            @* 電子郵件 *@
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label"></label>
+                <input asp-for="Input.Email" class="form-control" type="email"/>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+             @* 電話號碼 *@
+            <div class="mb-3">
+                <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                <input asp-for="Input.PhoneNumber" class="form-control" type="tel"/>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+
+             @* 鎖定帳號 Checkbox *@
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" asp-for="Input.IsLockedOut" />
+                <label class="form-check-label" asp-for="Input.IsLockedOut"></label>
+                <span asp-validation-for="Input.IsLockedOut" class="text-danger"></span>
+                <div class="form-text">勾選以鎖定此帳號。解鎖請取消勾選。</div>
+            </div>
+
+            @* 鎖定結束時間 (可選，如果 IsLockedOut 被勾選才顯示/啟用) *@
+            @* 這裡可以加入 JavaScript 來動態顯示/隱藏 *@
+             <div class="mb-3" id="lockoutEndDiv" style="@(Model.Input.IsLockedOut ? "" : "display:none;")">
+                <label asp-for="Input.LockoutEnd" class="form-label"></label>
+                <input asp-for="Input.LockoutEnd" class="form-control" type="datetime-local"/>
+                <span asp-validation-for="Input.LockoutEnd" class="text-danger"></span>
+                <div class="form-text">設定鎖定結束時間 (UTC)。留空表示永久鎖定 (直到手動解鎖)。</div>
+            </div>
+
+
+            @* 提交與返回按鈕 *@
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">儲存變更</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">返回使用者列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // JavaScript to show/hide LockoutEnd based on IsLockedOut checkbox
+        $(document).ready(function () {
+            const lockoutCheckbox = $('#Input_IsLockedOut'); // ID 由 asp-for 產生
+            const lockoutEndDiv = $('#lockoutEndDiv');
+
+            function toggleLockoutEnd() {
+                if (lockoutCheckbox.is(':checked')) {
+                    lockoutEndDiv.show();
+                } else {
+                    lockoutEndDiv.hide();
+                    // 解鎖時可以考慮清空日期時間欄位
+                    // $('#Input_LockoutEnd').val('');
+                }
+            }
+
+            // Initial check
+            toggleLockoutEnd();
+
+            // Bind change event
+            lockoutCheckbox.on('change', toggleLockoutEnd);
+        });
+    </script>
+}

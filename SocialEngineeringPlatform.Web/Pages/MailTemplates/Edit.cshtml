@@ -1,0 +1,147 @@
+﻿@page "{id:int?}"
+@using SocialEngineeringPlatform.Web.Common
+@model SocialEngineeringPlatform.Web.Pages.MailTemplates.EditModel
+
+@{
+    ViewData["Title"] = "編輯郵件範本";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>郵件範本</h4>
+<hr/>
+<div class="row">
+    <div class="col-md-8">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* 隱藏欄位，儲存要編輯的 Id *@
+            <input type="hidden" asp-for="MailTemplate.Id"/>
+            @* 建立者 ID 和建立時間不應被修改，也不需要隱藏欄位傳遞 *@
+            @* <input type="hidden" asp-for="MailTemplate.CreatedByUserId" /> *@
+            @* <input type="hidden" asp-for="MailTemplate.CreateTime" /> *@
+
+
+            @* 範本名稱 *@
+            <div class="mb-3">
+                <label asp-for="MailTemplate.Name" class="form-label"></label>
+                <input asp-for="MailTemplate.Name" class="form-control"/>
+                <span asp-validation-for="MailTemplate.Name" class="text-danger"></span>
+            </div>
+
+            @* 主旨 *@
+            <div class="mb-3">
+                <label asp-for="MailTemplate.Subject" class="form-label"></label>
+                <input asp-for="MailTemplate.Subject" class="form-control"/>
+                <span asp-validation-for="MailTemplate.Subject" class="text-danger"></span>
+            </div>
+
+            @* 所屬分類 (下拉選單) *@
+            <div class="mb-3">
+                <label asp-for="MailTemplate.CategoryId" class="form-label"></label>
+                <select asp-for="MailTemplate.CategoryId" class="form-select" asp-items="Model.CategoryNameSL">
+                    <option value="">-- 請選擇分類 (可選) --</option>
+                </select>
+                <span asp-validation-for="MailTemplate.CategoryId" class="text-danger"></span>
+            </div>
+
+            @* 內文 (使用 Textarea，會被 TinyMCE 取代) *@
+            <div class="mb-3">
+                <label asp-for="MailTemplate.Body" class="form-label"></label>
+                @* *** 重要：給 textarea 一個明確的 ID *** *@
+                <textarea asp-for="MailTemplate.Body" class="form-control" rows="15" id="mailBodyEditor"></textarea>
+                <span asp-validation-for="MailTemplate.Body" class="text-danger"></span>
+                
+                <div class="form-text">
+                    提示：在需要導向模擬登陸頁的連結處，將連結的 `href` 屬性設為 `<code>@AppConstants.PhishingLinkPlaceholder</code>`。
+                    例如：`&lt;a href="@AppConstants.PhishingLinkPlaceholder"&gt;點此登入&lt;/a&gt;`。
+                    其他普通連結請使用完整的絕對路徑 (例如 `https://...`)。
+                </div>
+            </div>
+
+
+            @* 語言 (下拉選單) *@
+            <div class="mb-3">
+                <label asp-for="MailTemplate.Language" class="form-label"></label>
+                <select asp-for="MailTemplate.Language" class="form-select" asp-items="Model.LanguageSL">
+                    <option value="">-- 請選擇語言 (可選) --</option>
+                </select>
+                <span asp-validation-for="MailTemplate.Language" class="text-danger"></span>
+            </div>
+
+            @* 附件路徑 *@
+            <div class="mb-3">
+                <label asp-for="MailTemplate.AttachmentPath" class="form-label"></label>
+                <input asp-for="MailTemplate.AttachmentPath" class="form-control"/>
+                <span asp-validation-for="MailTemplate.AttachmentPath" class="text-danger"></span>
+            </div>
+            
+            @* *** 新增：自訂寄件者 Email *** *@
+            <div class="mb-3">
+                <label asp-for="MailTemplate.CustomFromAddress" class="form-label"></label>
+                <input asp-for="MailTemplate.CustomFromAddress" class="form-control" type="email" placeholder="留空則使用系統預設寄件者" />
+                <span asp-validation-for="MailTemplate.CustomFromAddress" class="text-danger"></span>
+            </div>
+
+            @* *** 新增：自訂寄件者顯示名稱 *** *@
+            <div class="mb-3">
+                <label asp-for="MailTemplate.CustomFromDisplayName" class="form-label"></label>
+                <input asp-for="MailTemplate.CustomFromDisplayName" class="form-control" placeholder="留空則使用系統預設名稱" />
+                <span asp-validation-for="MailTemplate.CustomFromDisplayName" class="text-danger"></span>
+            </div>
+
+            @* 顯示唯讀資訊 *@
+            <div class="mb-3">
+                <label class="form-label">建立者</label>
+                @* 需要在 PageModel 的 OnGetAsync 中載入 CreatedByUser 才能顯示 Email *@
+                <input class="form-control" value="@(Model.MailTemplate.CreatedByUser?.Email ?? "N/A")" readonly/>
+            </div>
+            <div class="mb-3">
+                <label asp-for="MailTemplate.CreateTime" class="form-label"></label>
+                <input asp-for="MailTemplate.CreateTime" class="form-control" readonly/>
+            </div>
+            <div class="mb-3">
+                <label asp-for="MailTemplate.UpdateTime" class="form-label"></label>
+                <input asp-for="MailTemplate.UpdateTime" class="form-control" readonly/>
+            </div>
+
+            @* 提交與返回按鈕 *@
+            <div class="mb-3">
+                <button type="submit" class="btn btn-success">儲存</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">返回列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    <script src="~/lib/tinymce/js/tinymce/tinymce.min.js"></script>
+    <script>
+        // 初始化 TinyMCE
+        tinymce.init({
+            language: 'zh_TW',
+            license_key: 'gpl',
+            selector: 'textarea#mailBodyEditor', // *** 使用 ID 選取器 ***
+            plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons accordion',
+            menubar: 'file edit view insert format tools table help',
+            toolbar: 'undo redo | accordion accordionremove | blocks fontfamily fontsize | bold italic underline strikethrough | align numlist bullist | link image | table media | lineheight outdent indent| forecolor backcolor removeformat | charmap emoticons | code fullscreen preview | save print | pagebreak anchor codesample | ltr rtl',
+            autosave_ask_before_unload: true,
+            autosave_interval: '30s',
+            autosave_prefix: '{path}{query}-{id}-',
+            autosave_restore_when_empty: false,
+            autosave_retention: '2m',
+            height: 600, // 設定編輯器高度
+            image_caption: true,
+            quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+            noneditable_class: 'mceNonEditable',
+            toolbar_mode: 'sliding',
+            contextmenu: 'link image table',
+            skin: (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oxide-dark' : 'oxide'), // 自動深色模式
+            content_css: (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'), // 自動深色模式
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }' // 設定編輯器內文字樣式
+            // 可以加入更多自訂設定，例如圖片上傳處理等
+        });
+    </script>
+}

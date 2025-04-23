@@ -1,0 +1,99 @@
+﻿@page
+@model SocialEngineeringPlatform.Web.Pages.TargetGroups.IndexModel
+
+@{
+    ViewData["Title"] = "目標群組列表";
+    // 可以選擇性地將 Layout 指向特定後台版面 (如果有的話)
+    // Layout = "_AdminLayout";
+}
+
+@section Styles{
+    @* 引用 DataTables.net 的 CSS (使用 CDN) - 已修正語法 *@
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.css" />
+
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    @* 新增目標群組的連結 *@
+    <a asp-page="Create" class="btn btn-primary">建立新群組</a>
+</p>
+
+@* 使用 Bootstrap 5 的表格樣式，並加上 id 以便 DataTables 初始化 *@
+<table id="targetGroupsTable" class="table table-striped table-bordered" style="width:100%">
+    <thead>
+    <tr>
+        @* 表頭欄位 *@
+        <th>
+            @* 使用 ModelExpressionProvider 或直接寫字串來避免 TargetGroups 為空時的錯誤 *@
+            @* @Html.DisplayNameFor(model => model.TargetGroups[0].Name) *@
+            名稱
+        </th>
+        <th>
+            @* @Html.DisplayNameFor(model => model.TargetGroups[0].Description) *@
+            描述
+        </th>
+        <th>
+            @* @Html.DisplayNameFor(model => model.TargetGroups[0].CreateTime) *@
+            建立時間
+        </th>
+        <th>操作</th> @* 用於放置操作按鈕的欄位 *@
+    </tr>
+    </thead>
+    <tbody>
+    @* 遍歷 Model 中的 TargetGroups 列表，產生表格內容行 *@
+    @foreach (var item in Model.TargetGroups)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @* 格式化時間顯示 *@
+                @item.CreateTime.ToString("yyyy-MM-dd HH:mm")
+            </td>
+            <td>
+                @* 操作按鈕：編輯、詳細資料、刪除 *@
+                <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">編輯</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">詳細</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">刪除</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@* 頁面專屬的 Script 區塊 *@
+@section Scripts {
+    @{
+        // 第一次載入頁面時執行 DataTables 初始化 (如果需要)
+        // await Html.RenderPartialAsync("_ValidationScriptsPartial"); // 如果頁面有表單驗證需求
+    }
+
+  
+    @* 引用 DataTables.net 的 JS (包含 jQuery - 注意：如果 _Layout.cshtml 已引用 jQuery，這裡可能不用重複引用 jQuery 本身) - 已修正語法 *@
+    @* <script src="[https://code.jquery.com/jquery-3.7.1.min.js](https://code.jquery.com/jquery-3.7.1.min.js)"></script> *@ @* 假設 _Layout.cshtml 已有 jQuery *@
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.js"></script>
+
+    <script type="text/javascript">
+        // 使用 jQuery 文件就緒函數，確保 DOM 載入完成後再執行
+        $(document).ready(function () {
+            // 初始化 DataTables
+            $('#targetGroupsTable').DataTable({
+                // 設定 DataTables 選項 (範例)
+                "language": { // 中文化設定 (可選)
+                    "url": "//cdn.datatables.net/plug-ins/2.0.5/i18n/zh-HANT.json" // 引用繁體中文語言檔
+                },
+                "paging": true, // 啟用分頁
+                "searching": true, // 啟用搜尋
+                "ordering": true, // 啟用排序
+                "info": true, // 顯示表格資訊
+                "responsive": true // 啟用響應式設計 (可選)
+            });
+        });
+    </script>
+}

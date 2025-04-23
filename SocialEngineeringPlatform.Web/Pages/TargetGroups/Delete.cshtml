@@ -1,0 +1,53 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.TargetGroups.DeleteModel
+
+@{
+    ViewData["Title"] = "刪除目標群組";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* 顯示警告訊息 *@
+<h3 class="text-danger">您確定要刪除這個目標群組嗎？</h3>
+<div>
+    <h4>目標群組</h4>
+    <hr />
+    @* 顯示要刪除的資料內容 (類似 Details 頁面) *@
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetGroup.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TargetGroup.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetGroup.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TargetGroup.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetGroup.CreateTime)
+        </dt>
+        <dd class="col-sm-10">
+            @Model.TargetGroup.CreateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetGroup.UpdateTime)
+        </dt>
+        <dd class="col-sm-10">
+            @Model.TargetGroup.UpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+    </dl>
+
+    @* 刪除確認表單 *@
+    <form method="post">
+        @* 隱藏欄位，用於在 POST 時傳遞要刪除的項目 Id *@
+        <input type="hidden" asp-for="TargetGroup.Id" />
+        @* 刪除按鈕，使用 btn-danger 樣式 *@
+        <button type="submit" class="btn btn-danger">確認刪除</button> |
+        @* 取消按鈕，返回列表頁 *@
+        <a asp-page="./Index" class="btn btn-secondary">取消</a>
+    </form>
+</div>

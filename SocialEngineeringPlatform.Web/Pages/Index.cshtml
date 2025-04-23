@@ -1,0 +1,134 @@
+﻿@page
+@model SocialEngineeringPlatform.Web.Pages.IndexModel
+@using SocialEngineeringPlatform.Web.Models.Enums
+
+@{
+    ViewData["Title"] = "儀表板";
+}
+
+<div class="text-center mb-4">
+    <h1 class="display-4">歡迎回來！</h1>
+    <p>社交工程演練平台儀表板</p>
+</div>
+
+@* 統計數據卡片區 *@
+<div class="row mb-4">
+    @* 總活動數卡片 *@
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            活動總數</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.DashboardData.TotalCampaigns</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar fa-2x text-gray-300"></i> @* 可以換成更適合的圖示 *@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* 各狀態活動數卡片 (可以迴圈產生或固定顯示) *@
+    @{
+        // 定義狀態和對應的樣式/圖示 (範例)
+        var statusInfo = new Dictionary<CampaignStatus, (string TextColor, string BorderColor, string Icon)>
+        {
+            { CampaignStatus.Draft, ("text-secondary", "border-left-secondary", "fa-pencil-alt") },
+            { CampaignStatus.Scheduled, ("text-info", "border-left-info", "fa-clock") },
+            { CampaignStatus.Running, ("text-success", "border-left-success", "fa-running") },
+            { CampaignStatus.Completed, ("text-primary", "border-left-primary", "fa-check-circle") },
+            { CampaignStatus.Cancelled, ("text-danger", "border-left-danger", "fa-times-circle") }
+        };
+    }
+
+    @foreach (var status in Enum.GetValues(typeof(CampaignStatus)).Cast<CampaignStatus>())
+    {
+        if (Model.DashboardData.CampaignStatusCounts.TryGetValue(status, out int count))
+        {
+            var info = statusInfo.GetValueOrDefault(status, ("text-gray-800", "border-left-dark", "fa-question-circle"));
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card @info.Item2 shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold @info.Item1 text-uppercase mb-1">
+                                    @status.ToString() @* 顯示 Enum 名稱 *@
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@count</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas @info.Item1 fa-2x text-gray-300"></i> @* Font Awesome 圖示 *@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@* 最近活動列表 *@
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">最近建立的活動</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.DashboardData.RecentCampaigns.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover w-100 p-0">
+                            <thead>
+                                <tr>
+                                    <th>活動名稱</th>
+                                    <th>狀態</th>
+                                    <th>建立者</th>
+                                    <th>建立時間</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var campaign in Model.DashboardData.RecentCampaigns)
+                                {
+                                    <tr>
+                                        <td>@campaign.Name</td>
+                                        <td>
+                                            @{
+                                                var statusClass = "bg-secondary";
+                                                switch(campaign.Status) { /* ... (同上的 Badge 樣式) ... */
+                                                    case CampaignStatus.Running: statusClass = "bg-success"; break;
+                                                    case CampaignStatus.Scheduled: statusClass = "bg-info text-dark"; break;
+                                                    case CampaignStatus.Completed: statusClass = "bg-primary"; break;
+                                                    case CampaignStatus.Draft: statusClass = "bg-light text-dark border"; break;
+                                                    case CampaignStatus.Cancelled: statusClass = "bg-danger"; break;
+                                                }
+                                            }
+                                            <span class="badge @statusClass">@campaign.Status</span>
+                                        </td>
+                                        <td>@(campaign.CreatedByUser?.Email ?? "N/A")</td>
+                                        <td>@campaign.CreateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td>
+                                            <a asp-page="/Campaigns/Details" asp-route-id="@campaign.Id" class="btn btn-sm btn-info">詳細</a>
+                                            @* 可以加入其他快速操作按鈕 *@
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p>目前沒有任何活動。</p>
+                }
+                 <div class="mt-3">
+                     <a asp-page="/Campaigns/Index" class="btn btn-outline-primary btn-sm">查看所有活動</a>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>

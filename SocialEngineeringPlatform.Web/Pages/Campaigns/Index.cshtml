@@ -1,0 +1,125 @@
+﻿@page
+@model SocialEngineeringPlatform.Web.Pages.Campaigns.IndexModel
+
+
+@{
+    ViewData["Title"] = "演練活動列表";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    @* 建立新活動的連結 *@
+    <a asp-page="Create" class="btn btn-primary">建立新活動</a>
+</p>
+<table id="campaignsTable" class="table table-striped table-bordered" style="width:100%">
+    <thead>
+        <tr>
+            <th>
+                @* @Html.DisplayNameFor(model => model.CampaignList[0].Name) *@
+                活動名稱
+            </th>
+            <th>
+                @* @Html.DisplayNameFor(model => model.CampaignList[0].Status) *@
+                狀態
+            </th>
+            <th>
+                @* @Html.DisplayNameFor(model => model.CampaignList[0].MailTemplate) *@
+                郵件範本
+            </th>
+            <th>
+                @* @Html.DisplayNameFor(model => model.CampaignList[0].LandingPageTemplate) *@
+                登陸頁範本
+            </th>
+            <th>
+                @* @Html.DisplayNameFor(model => model.CampaignList[0].ScheduledSendTime) *@
+                預定發送
+            </th>
+             <th>
+                @* @Html.DisplayNameFor(model => model.CampaignList[0].CreatedByUser) *@
+                建立者
+            </th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.CampaignList) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @* 直接顯示 Enum 的名稱 *@
+                @Html.DisplayFor(modelItem => item.Status)
+                @* 可以根據狀態加上不同的 Bootstrap Badge 樣式 (範例) *@
+                @*
+                @{
+                    var statusClass = "bg-secondary";
+                    switch(item.Status) {
+                        case CampaignStatus.Running: statusClass = "bg-success"; break;
+                        case CampaignStatus.Scheduled: statusClass = "bg-info text-dark"; break;
+                        case CampaignStatus.Completed: statusClass = "bg-primary"; break;
+                        case CampaignStatus.Draft: statusClass = "bg-light text-dark"; break;
+                        case CampaignStatus.Cancelled: statusClass = "bg-danger"; break;
+                    }
+                }
+                <span class="badge @statusClass">@Html.DisplayFor(modelItem => item.Status)</span>
+                *@
+            </td>
+            <td>
+                @(item.MailTemplate?.Name ?? "N/A")
+            </td>
+            <td>
+                @(item.LandingPageTemplate?.Name ?? "N/A")
+            </td>
+            <td>
+                @(item.ScheduledSendTime?.ToString("yyyy-MM-dd HH:mm") ?? "未排程")
+            </td>
+             <td>
+                @(item.CreatedByUser?.Email ?? "N/A")
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">編輯</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">詳細</a> |
+                <a asp-page="./Results" asp-route-id="@item.Id" class="btn btn-sm btn-outline-success">報告</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">刪除</a>
+                @* 未來可以加入 "啟動"、"取消"、"查看報告" 等按鈕 *@
+                @* | <a asp-page="./Results" asp-route-id="@item.Id" class="btn btn-sm btn-outline-success">報告</a> *@
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+@section Scripts {
+    @{
+        // await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    @* 引用 DataTables.net 的 CSS *@
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.css"/>
+
+    @* 引用 DataTables.net 的 JS *@
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#campaignsTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/2.0.5/i18n/zh-HANT.json"
+                },
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "responsive": true,
+                "order": [[ 5, "desc" ]], // 預設依照第 6 欄 (建立時間，索引為 5) 降冪排序
+                "columnDefs": [
+                    // 最後的 "操作" 欄不允許排序
+                    { "orderable": false, "targets": 6 }
+                ]
+            });
+        });
+    </script>
+}

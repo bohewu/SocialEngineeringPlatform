@@ -1,0 +1,198 @@
+﻿@page "{campaignId:int}"
+@model SocialEngineeringPlatform.Web.Pages.Campaigns.ManageTargetsModel
+
+@{
+ViewData["Title"] = "管理活動目標";
+// Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+<h2>活動：@Model.Campaign.Name</h2> @* 顯示目前正在管理的活動名稱 *@
+<hr />
+
+@* 顯示目前已加入的目標 *@
+<div class="mb-4">
+    <h4>目前目標 (@Model.CurrentTargets.Count)</h4>
+    @if (Model.CurrentTargets.Any())
+    {
+    <table class="table table-sm table-bordered" style="max-width: 800px;"> @* 加寬一點以容納按鈕 *@
+        <thead>
+        <tr>
+            <th>電子郵件</th>
+            <th>姓名</th>
+            <th>操作</th> @* *** 新增操作欄位 *** *@
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var user in Model.CurrentTargets)
+        {
+        <tr>
+            <td>@user.Email</td>
+            <td>@(user.Name ?? "-")</td>
+            <td>
+                @* *** 新增移除按鈕的表單 *** *@
+                <form method="post" asp-page-handler="RemoveTarget" asp-route-userId="@user.Id" onsubmit="return confirm('您確定要從此活動移除使用者 @user.Email 嗎？');" style="display:inline;">
+                    @* 雖然 CampaignId 已透過 BindProperty 取得，但在 Form 中明確傳遞更保險 *@
+                    <input type="hidden" name="CampaignId" value="@Model.CampaignId" />
+                    <button type="submit" class="btn btn-xs btn-danger">移除</button>
+                </form>
+            </td>
+        </tr>
+        }
+        </tbody>
+    </table>
+    }
+    else
+    {
+    <p>此活動目前沒有任何目標對象。</p>
+    }
+</div>
+
+@* 新增目標的表單和列表 *@
+<div>
+    <h4>新增目標</h4>
+    <form method="post"> @* 這個表單預設對應 OnPostAsync (或 OnPostAddTargetsAsync) *@
+        @* 隱藏欄位傳遞 CampaignId (雖然 PageModel 已有，但表單內有時也需要) *@
+        @* <input type="hidden" asp-for="CampaignId" /> *@
+
+        @if (Model.AvailableTargetUsers.Any())
+        {
+        <p>從下方勾選要加入此活動的目標使用者：</p>
+        <div class="mb-3">
+            <button type="submit" class="btn btn-success">新增選取目標</button>
+            <a asp-page="./Details" asp-route-id="@Model.CampaignId" class="btn btn-secondary ms-2">返回活動詳細</a>
+        </div>
+
+        <table id="availableTargetsTable" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+            <tr>
+                @* *** 修改：加上 class="select-all-checkbox-th" 方便選取 *** *@
+                <th class="select-all-checkbox-th" style="width: 30px;"><input type="checkbox" id="selectAllCheckbox" /></th>
+                <th>電子郵件</th>
+                <th>姓名</th>
+                <th>所屬群組</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var user in Model.AvailableTargetUsers)
+            {
+            <tr>
+                @* *** 修改：加上 class="target-checkbox-cell" 方便選取 *** *@
+                <td class="target-checkbox-cell">
+                    <input type="checkbox" name="TargetsToAdd" value="@user.Id" class="target-checkbox" />
+                </td>
+                <td>@user.Email</td>
+                <td>@(user.Name ?? "-")</td>
+                <td>@(user.Group?.Name ?? "N/A")</td>
+            </tr>
+            }
+            </tbody>
+        </table>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-success">新增選取目標</button>
+            <a asp-page="./Details" asp-route-id="@Model.CampaignId" class="btn btn-secondary ms-2">返回活動詳細</a>
+        </div>
+        }
+        else
+        {
+        <p>沒有可供加入的目標使用者了 (可能所有使用者都已加入，或系統中沒有使用者)。</p>
+        <a asp-page="./Details" asp-route-id="@Model.CampaignId" class="btn btn-secondary ms-2">返回活動詳細</a>
+        }
+    </form>
+</div>
+
+
+@section Scripts {
+@{
+// await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+
+@* 引用 DataTables.net 的 CSS *@
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.css"/>
+
+@* 引用 DataTables.net 的 JS *@
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.js"></script>
+
+@* *** 修改：更新 DataTables 和 Checkbox 的 JavaScript 邏輯 *** *@
+<script type="text/javascript">
+    $(document).ready(function () {
+        // 初始化可用目標表格的 DataTables
+        var availableTable = $('#availableTargetsTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/2.0.5/i18n/zh-HANT.json"
+            },
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "responsive": true,
+            "columnDefs": [
+                // Checkbox 和 Group 欄位不可排序
+                { "orderable": false, "targets": [0, 3], "className": "dt-body-center" } // 將 Checkbox 置中
+            ],
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "全部"]]
+        });
+
+        // --- 更新後的 Checkbox 邏輯 ---
+
+        // 表頭 Checkbox 點擊事件
+        $('#selectAllCheckbox').on('click', function(){
+            var isChecked = this.checked;
+            // 找到 DataTables 中符合目前篩選/分頁條件的所有資料列中的 target-checkbox
+            availableTable.rows({ search: 'applied' }).nodes().to$().find('td:first-child input.target-checkbox[type="checkbox"]').prop('checked', isChecked);
+        });
+
+        // 表身 Checkbox 變更事件 (使用事件委派，效率較好)
+        $('#availableTargetsTable tbody').on('change', 'input.target-checkbox[type="checkbox"]', function(){
+            // 當任何一個 body checkbox 狀態改變時，就更新表頭 checkbox 的狀態
+            updateSelectAllCheckboxState();
+        });
+
+        // DataTables 重繪事件 (分頁、搜尋、排序後觸發)
+        availableTable.on('draw', function() {
+            // 重繪後也要更新表頭 checkbox 狀態
+            updateSelectAllCheckboxState();
+        });
+
+        // 更新表頭 Checkbox 狀態的輔助函式
+        function updateSelectAllCheckboxState() {
+            var $headerCheckbox = $('#selectAllCheckbox');
+            // 只考慮符合目前篩選/分頁條件的資料列
+            var $rows = availableTable.rows({ search: 'applied' }).nodes().to$();
+            var $bodyCheckboxes = $rows.find('td:first-child input.target-checkbox[type="checkbox"]');
+
+            var totalCheckboxes = $bodyCheckboxes.length;
+            var checkedCheckboxes = $bodyCheckboxes.filter(':checked').length;
+
+            if (totalCheckboxes === 0) { // 沒有資料時
+                $headerCheckbox.prop('checked', false);
+                $headerCheckbox.prop('indeterminate', false);
+            } else if (checkedCheckboxes === totalCheckboxes) { // 全部勾選
+                $headerCheckbox.prop('checked', true);
+                $headerCheckbox.prop('indeterminate', false);
+            } else if (checkedCheckboxes === 0) { // 全部未勾選
+                $headerCheckbox.prop('checked', false);
+                $headerCheckbox.prop('indeterminate', false);
+            } else { // 部分勾選
+                $headerCheckbox.prop('checked', false); // 設為未勾選
+                $headerCheckbox.prop('indeterminate', true); // 設為部分選取狀態
+            }
+        }
+
+        // 頁面載入時，執行一次狀態更新
+        updateSelectAllCheckboxState();
+
+        // --- Checkbox 邏輯結束 ---
+
+        // 提示：確保 OnGetAsync 中查詢 AvailableTargetUsers 時有 Include Group
+        /*
+         AvailableTargetUsers = await _context.TargetUsers
+                                   .Include(tu => tu.Group) // <--- 確認有這個 Include
+                                   .Where(tu => tu.IsActive && !currentTargetIds.Contains(tu.Id))
+                                   .OrderBy(tu => tu.Email)
+                                   .AsNoTracking()
+                                   .ToListAsync();
+        */
+    });
+</script>
+}

@@ -1,0 +1,77 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.TargetUsers.DeleteModel
+
+@{
+    ViewData["Title"] = "刪除目標使用者";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* 警告訊息 *@
+<h3 class="text-danger">您確定要刪除這個目標使用者嗎？</h3>
+<div>
+    <h4>目標使用者</h4>
+    <hr />
+    @* 顯示要刪除的資料 *@
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetUser.Email)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TargetUser.Email)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetUser.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TargetUser.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetUser.Group)
+        </dt>
+        <dd class = "col-sm-10">
+            @(Model.TargetUser.Group?.Name ?? "N/A") @* 顯示群組名稱 *@
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetUser.CustomField1)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TargetUser.CustomField1)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetUser.CustomField2)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TargetUser.CustomField2)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetUser.IsActive)
+        </dt>
+        <dd class = "col-sm-10">
+            @(Model.TargetUser.IsActive ? "是" : "否")
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetUser.CreateTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.TargetUser.CreateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetUser.UpdateTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.TargetUser.UpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+    </dl>
+
+    @* 刪除確認表單 *@
+    <form method="post">
+        @* 隱藏欄位傳遞 Id *@
+        <input type="hidden" asp-for="TargetUser.Id" />
+        @* 確認刪除按鈕 *@
+        <button type="submit" class="btn btn-danger">確認刪除</button> |
+        @* 取消按鈕 *@
+        <a asp-page="./Index" class="btn btn-secondary">取消</a>
+    </form>
+</div>

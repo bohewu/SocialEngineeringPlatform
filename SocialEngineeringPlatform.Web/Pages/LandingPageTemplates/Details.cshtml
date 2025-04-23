@@ -1,0 +1,61 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.LandingPageTemplates.DetailsModel
+
+@{
+    ViewData["Title"] = "登陸頁範本詳細資料";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>登陸頁範本</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LandingPageTemplate.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.CreatedByUser)
+        </dt>
+        <dd class = "col-sm-10">
+            @(Model.LandingPageTemplate.CreatedByUser?.Email ?? "N/A")
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.CollectFieldsConfig)
+        </dt>
+        <dd class = "col-sm-10">
+            @* 使用 pre 標籤顯示設定檔內容，保留格式 *@
+            <pre style="white-space: pre-wrap; word-wrap: break-word;">@Html.DisplayFor(model => model.LandingPageTemplate.CollectFieldsConfig)</pre>
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.CreateTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.LandingPageTemplate.CreateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.UpdateTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.LandingPageTemplate.UpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LandingPageTemplate.HtmlContent)
+        </dt>
+        <dd class = "col-sm-10">
+            <div class="border p-2 bg-light fs-6">
+                @Html.Raw(Model.LandingPageTemplate.HtmlContent)
+            </div>
+        </dd>
+    </dl>
+</div>
+<div>
+    @* 編輯按鈕 *@
+    <a asp-page="./Edit" asp-route-id="@Model.LandingPageTemplate.Id" class="btn btn-primary">編輯</a> |
+    @* 返回列表連結 *@
+    <a asp-page="./Index" class="btn btn-secondary">返回列表</a>
+</div>

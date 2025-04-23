@@ -1,0 +1,93 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.Campaigns.DeleteModel
+@using SocialEngineeringPlatform.Web.Models.Enums @* 引用 Enum *@
+
+@{
+    ViewData["Title"] = "刪除演練活動";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* 根據後端檢查結果顯示不同的警告訊息 *@
+@if (Model.CanDelete)
+{
+    <h3 class="text-danger">@Model.DeletionWarningMessage</h3> @* 顯示可刪除的確認訊息 *@
+}
+else
+{
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">無法刪除！</h4>
+        <p>@Model.DeletionWarningMessage</p> @* 顯示不可刪除的原因 *@
+    </div>
+}
+
+@* 顯示要刪除的活動資料 *@
+<div>
+    <h4>演練活動</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.Name)
+        </dt>
+        <dd class = "col-sm-9">
+            @Html.DisplayFor(model => model.Campaign.Name)
+        </dd>
+         <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.Status)
+        </dt>
+        <dd class = "col-sm-9">
+            @{
+                var statusClass = "bg-secondary";
+                switch(Model.Campaign.Status) {
+                    case CampaignStatus.Draft: statusClass = "bg-light text-dark border"; break;
+                    case CampaignStatus.Cancelled: statusClass = "bg-danger"; break;
+                    // 其他狀態理論上不會出現在可刪除的情況
+                    default: statusClass = "bg-warning text-dark"; break;
+                }
+            }
+            <span class="badge @statusClass fs-6">@Html.DisplayFor(model => model.Campaign.Status)</span>
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.MailTemplate)
+        </dt>
+        <dd class = "col-sm-9">
+            @(Model.Campaign.MailTemplate?.Name ?? "N/A")
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.LandingPageTemplate)
+        </dt>
+        <dd class = "col-sm-9">
+            @(Model.Campaign.LandingPageTemplate?.Name ?? "無")
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.ScheduledSendTime)
+        </dt>
+        <dd class = "col-sm-9">
+            @(Model.Campaign.ScheduledSendTime?.ToString("yyyy-MM-dd HH:mm") ?? "未排程")
+        </dd>
+         <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.CreatedByUser)
+        </dt>
+        <dd class = "col-sm-9">
+            @(Model.Campaign.CreatedByUser?.Email ?? "N/A")
+        </dd>
+         <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.CreateTime)
+        </dt>
+        <dd class = "col-sm-9">
+             @Model.Campaign.CreateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+    </dl>
+
+    @* 刪除確認表單 *@
+    <form method="post">
+        <input type="hidden" asp-for="Campaign.Id" />
+        @* 如果 CanDelete 為 true 才顯示刪除按鈕 *@
+        @if (Model.CanDelete)
+        {
+            <button type="submit" class="btn btn-danger">確認刪除</button> @:|
+        }
+        <a asp-page="./Index" class="btn btn-secondary ms-2">返回列表</a>
+    </form>
+</div>

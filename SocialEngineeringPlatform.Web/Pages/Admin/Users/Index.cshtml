@@ -1,0 +1,66 @@
+﻿@page
+@using System.Security.Claims
+@model SocialEngineeringPlatform.Web.Pages.Admin.Users.IndexModel
+
+@{
+    ViewData["Title"] = "使用者管理";
+    // Layout = "_AdminLayout"; // 可選
+    
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // 獲取當前登入用戶的 ID
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>
+    <a asp-page="Create" class="btn btn-primary">建立新使用者</a>
+</p>
+
+@* 顯示使用者列表的表格 *@
+<table id="usersTable" class="table table-striped table-bordered">
+    <thead>
+    <tr>
+        <th>使用者 ID</th>
+        <th>@Html.DisplayNameFor(model => model.Users[0].UserName)</th>
+        <th>@Html.DisplayNameFor(model => model.Users[0].Email)</th>
+        <th>@Html.DisplayNameFor(model => model.Users[0].EmailConfirmed)</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model.Users) {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => user.Id)</td>
+            <td>@Html.DisplayFor(modelItem => user.UserName)</td>
+            <td>@Html.DisplayFor(modelItem => user.Email)</td>
+            <td>@(user.EmailConfirmed ? "是" : "否")</td>
+            <td>
+                @* *** 修改：加入編輯按鈕 *** *@
+                <a asp-page="./Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary">編輯</a> |
+                <a asp-page="./EditRoles" asp-route-userId="@user.Id" class="btn btn-sm btn-outline-primary">管理角色</a> |
+                @* *** 修改：如果是目前登入的使用者，則禁用刪除按鈕 *** *@
+                @if (user.Id == currentUserId)
+                {
+                    <button type="button" class="btn btn-sm btn-outline-danger disabled" title="無法刪除自己的帳號">刪除</button>
+                }
+                else
+                {
+                    <a asp-page="./Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger">刪除</a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@* DataTables.net 腳本 (可選) *@
+@section Scripts {
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.css"/>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#usersTable').DataTable({ // 使用表格 ID 初始化
+                "language": { "url": "//cdn.datatables.net/plug-ins/2.0.5/i18n/zh-HANT.json" },
+                 "columnDefs": [ { "orderable": false, "targets": 4 } ] // 操作欄不可排序
+            });
+        });
+    </script>
+}

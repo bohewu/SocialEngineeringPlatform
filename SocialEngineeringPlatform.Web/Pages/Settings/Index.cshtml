@@ -1,0 +1,90 @@
+﻿@page
+@model SocialEngineeringPlatform.Web.Pages.Settings.IndexModel
+@{
+    ViewData["Title"] = "系統設定";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">SMTP 伺服器設定</h6>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+            @* 隱藏 ID 欄位 *@
+            <input type="hidden" asp-for="Input.Id" />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.Host" class="form-label"></label>
+                    <input asp-for="Input.Host" class="form-control" placeholder="例如：smtp.gmail.com" />
+                    <span asp-validation-for="Input.Host" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Input.Port" class="form-label"></label>
+                    <input asp-for="Input.Port" class="form-control" type="number" />
+                    <span asp-validation-for="Input.Port" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 mb-3 align-self-center"> @* 垂直置中 Checkbox *@
+                    <div class="form-check mt-4">
+                        <input type="checkbox" class="form-check-input" asp-for="Input.EnableSsl" />
+                        <label class="form-check-label" asp-for="Input.EnableSsl"></label>
+                        <span asp-validation-for="Input.EnableSsl" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+             <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.Username" class="form-label"></label>
+                    <input asp-for="Input.Username" class="form-control" autocomplete="username" placeholder="您的 SMTP 登入帳號 (通常是 Email)" />
+                    <span asp-validation-for="Input.Username" class="text-danger"></span>
+                </div>
+                 <div class="col-md-6 mb-3">
+                    <label asp-for="Input.NewPassword" class="form-label"></label>
+                    <input asp-for="Input.NewPassword" class="form-control" type="password" autocomplete="new-password" placeholder="若要更新密碼請在此輸入" />
+                    <span asp-validation-for="Input.NewPassword" class="text-danger"></span>
+                    <div class="form-text">如果您不需要變更密碼，請將此欄位留空。</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.FromAddress" class="form-label"></label>
+                    <input asp-for="Input.FromAddress" class="form-control" type="email" placeholder="預設寄件者 Email 地址" />
+                    <span asp-validation-for="Input.FromAddress" class="text-danger"></span>
+                </div>
+                 <div class="col-md-6 mb-3">
+                    <label asp-for="Input.FromDisplayName" class="form-label"></label>
+                    <input asp-for="Input.FromDisplayName" class="form-control" placeholder="預設寄件者顯示名稱" />
+                    <span asp-validation-for="Input.FromDisplayName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success">儲存 SMTP 設定</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@* 可以加入其他設定區塊，例如資料保留策略等 *@
+@*
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">其他設定</h6>
+    </div>
+    <div class="card-body">
+        <p>...</p>
+    </div>
+</div>
+*@
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,116 @@
+﻿@* --- 8. Pages/Shared/_Layout.cshtml (修改導覽列) --- *@
+@* *** 加入必要的 using 和 inject *** *@
+@using SocialEngineeringPlatform.Web.Models.Core
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @* 使用 ViewData 或 ViewBag 設定每個頁面的標題，預設為 "社交工程演練平台" *@
+    <title>@ViewData["Title"] - 社交工程演練平台</title>
+    @* 引用 Bootstrap 5 CSS (通常已由範本提供) *@
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    @await RenderSectionAsync("Styles", required: false) @* 允許各個頁面注入額外的 CSS *@
+    
+    @* 引用自訂的 CSS (site.css) *@
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @* 引用專案的 .styles.css (用於 Razor Class Libraries 或 Blazor) *@
+    @* <link rel="stylesheet" href="~/SocialEngineeringPlatform.Web.styles.css" asp-append-version="true" /> *@
+</head>
+<body>
+<header>
+    @* 使用 Bootstrap 5 的 Navbar 元件 *@
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <div class="container">
+            @* 網站品牌名稱，連結到首頁 *@
+            <a class="navbar-brand" asp-area="" asp-page="/Index">社交工程演練平台</a>
+            @* Navbar 切換按鈕 (用於小螢幕) *@
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            @* Navbar 主要內容區塊 *@
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                @* 左側導覽連結 *@
+                <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-page="/Index">儀表板</a> @* 連結到首頁/儀表板 *@
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-page="/Campaigns/Index">演練活動</a> @* 連結到活動列表頁 (路徑待建立) *@
+                    </li>
+                    <li class="nav-item dropdown"> @* 範本管理下拉選單 *@
+                        <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownTemplates" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            範本管理
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownTemplates">
+                            <li><a class="dropdown-item" asp-area="" asp-page="/MailTemplates/Index">郵件範本</a></li> @* 連結到郵件範本列表頁 (路徑待建立) *@
+                            <li><a class="dropdown-item" asp-area="" asp-page="/LandingPageTemplates/Index">登陸頁範本</a></li>@* 連結到登陸頁範本列表頁 (路徑待建立) *@
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/MailTemplateCategories/Index">範本分類</a></li>@* 連結到範本分類列表頁 (路徑待建立) *@
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown"> @* 目標管理下拉選單 *@
+                        <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownTargets" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            目標管理
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownTargets">
+                            <li><a class="dropdown-item" asp-area="" asp-page="/TargetUsers/Index">目標使用者</a></li> @* 連結到目標使用者列表頁 (路徑待建立) *@
+                            <li><a class="dropdown-item" asp-area="" asp-page="/TargetGroups/Index">目標群組</a></li> @* 連結到目標群組列表頁 (路徑待建立) *@
+                        </ul>
+                    </li>
+                    @* *** 修改：加入權限檢查 *** *@
+                    @if (SignInManager.IsSignedIn(User) 
+                                          && await UserManager.IsInRoleAsync((await UserManager.GetUserAsync(User))!, ApplicationDbContext.RoleAdmin))
+                    {
+                        <li class="nav-item dropdown"> @* 系統管理下拉選單 *@
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                系統管理
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+                                <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">帳號管理</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Roles/Index">角色管理</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Users/Index">使用者管理</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                @* *** 新增：Hangfire 儀表板連結 *** *@
+                                <li><a class="dropdown-item" href="/hangfire" target="_blank"><i class="fas fa-tachometer-alt fa-fw me-1"></i>背景工作</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Settings/Index"><i class="fas fa-cog fa-fw me-1"></i>系統設定</a></li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
+                @* 右側部分：登入/登出狀態，由 _LoginPartial 處理 *@
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="container">
+    @* 主要內容呈現區域 *@
+    <partial name="_MessageAlertPartial" /> @* 載入狀態訊息 Partial View *@
+    <main role="main" class="pb-3">
+        @RenderBody() @* 每個頁面的具體內容會被渲染到這裡 *@
+    </main>
+</div>
+
+@* 頁尾 *@
+<footer class="border-top footer text-muted">
+    <div class="container">
+        &copy; @DateTime.Now.Year - 社交工程演練平台 - <a asp-area="" asp-page="/Privacy">隱私權政策</a> @* 可修改或移除 *@
+    </div>
+</footer>
+
+@* 引用的 JavaScript 函式庫 *@
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+@* 允許各個頁面注入額外的 Script *@
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

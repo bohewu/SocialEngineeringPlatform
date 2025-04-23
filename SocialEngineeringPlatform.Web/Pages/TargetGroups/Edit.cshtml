@@ -1,0 +1,60 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.TargetGroups.EditModel
+
+@{
+    ViewData["Title"] = "編輯目標群組";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>目標群組</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* *** 加入隱藏欄位來儲存 Id *** *@
+            <input type="hidden" asp-for="TargetGroup.Id" />
+
+            @* 名稱欄位 *@
+            <div class="mb-3">
+                <label asp-for="TargetGroup.Name" class="form-label"></label>
+                <input asp-for="TargetGroup.Name" class="form-control" />
+                <span asp-validation-for="TargetGroup.Name" class="text-danger"></span>
+            </div>
+
+            @* 描述欄位 *@
+            <div class="mb-3">
+                <label asp-for="TargetGroup.Description" class="form-label"></label>
+                <textarea asp-for="TargetGroup.Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="TargetGroup.Description" class="text-danger"></span>
+            </div>
+
+            @* 建立時間 (通常設為唯讀) *@
+            <div class="mb-3">
+                <label asp-for="TargetGroup.CreateTime" class="form-label"></label>
+                <input asp-for="TargetGroup.CreateTime" class="form-control" readonly />
+            </div>
+
+            @* 更新時間 (通常設為唯讀) *@
+            <div class="mb-3">
+                <label asp-for="TargetGroup.UpdateTime" class="form-label"></label>
+                <input asp-for="TargetGroup.UpdateTime" class="form-control" readonly />
+            </div>
+
+            @* 提交按鈕 *@
+            <div class="mb-3">
+                <button type="submit" class="btn btn-success">儲存變更</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">返回列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

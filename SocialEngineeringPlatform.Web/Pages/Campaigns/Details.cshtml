@@ -1,0 +1,188 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.Campaigns.DetailsModel
+@using SocialEngineeringPlatform.Web.Models.Enums @* 引用 Enum *@
+
+@{
+    ViewData["Title"] = "演練活動詳細資料";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>基本資訊</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.Name)
+        </dt>
+        <dd class = "col-sm-9">
+            @Html.DisplayFor(model => model.Campaign.Name)
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.Description)
+        </dt>
+        <dd class = "col-sm-9">
+            @Html.DisplayFor(model => model.Campaign.Description)
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.Status)
+        </dt>
+        <dd class = "col-sm-9">
+             @* 可以根據狀態加上不同的 Bootstrap Badge 樣式 (範例) *@
+            @{
+                var statusClass = "bg-secondary";
+                switch(Model.Campaign.Status) {
+                    case CampaignStatus.Running: statusClass = "bg-success"; break;
+                    case CampaignStatus.Scheduled: statusClass = "bg-info text-dark"; break;
+                    case CampaignStatus.Completed: statusClass = "bg-primary"; break;
+                    case CampaignStatus.Draft: statusClass = "bg-light text-dark border"; break; // 加上邊框讓淺色更明顯
+                    case CampaignStatus.Cancelled: statusClass = "bg-danger"; break;
+                }
+            }
+            <span class="badge @statusClass fs-6">@Html.DisplayFor(model => model.Campaign.Status)</span>
+        </dd>
+         <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.MailTemplate)
+        </dt>
+        <dd class = "col-sm-9">
+            @* 顯示關聯的郵件範本名稱，並加上連結 (可選) *@
+            @if(Model.Campaign.MailTemplate != null)
+            {
+                <a asp-page="/MailTemplates/Details" asp-route-id="@Model.Campaign.MailTemplateId">
+                    @Html.DisplayFor(model => model.Campaign.MailTemplate.Name)
+                </a>
+            } else {
+                @:N/A
+            }
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.LandingPageTemplate)
+        </dt>
+        <dd class = "col-sm-9">
+            @* 顯示關聯的登陸頁範本名稱，並加上連結 (可選) *@
+            @if(Model.Campaign.LandingPageTemplate != null)
+            {
+                <a asp-page="/LandingPageTemplates/Details" asp-route-id="@Model.Campaign.LandingPageTemplateId">
+                    @Html.DisplayFor(model => model.Campaign.LandingPageTemplate.Name)
+                </a>
+            } else {
+                @:無
+            }
+        </dd>
+        @* *** 新增：顯示目標群組 *** *@
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.TargetGroup)
+        </dt>
+        <dd class = "col-sm-9">
+            @if(Model.Campaign.TargetGroup != null)
+            {
+                <a asp-page="/TargetGroups/Details" asp-route-id="@Model.Campaign.TargetGroupId">
+                    @Html.DisplayFor(model => model.Campaign.TargetGroup.Name)
+                </a>
+            } else {
+                @:未指定 (手動管理目標)
+            }
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.ScheduledSendTime)
+        </dt>
+        <dd class = "col-sm-9">
+            @(Model.Campaign.ScheduledSendTime?.ToString("yyyy-MM-dd HH:mm") ?? "未排程")
+        </dd>
+         <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.ActualStartTime)
+        </dt>
+        <dd class = "col-sm-9">
+            @(Model.Campaign.ActualStartTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "尚未開始")
+        </dd>
+         <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.EndTime)
+        </dt>
+        <dd class = "col-sm-9">
+             @(Model.Campaign.EndTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "尚未結束")
+        </dd>
+         <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.IsAutoSend)
+        </dt>
+        <dd class = "col-sm-9">
+            @(Model.Campaign.IsAutoSend ? "是" : "否")
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.SendBatchDelaySeconds)
+        </dt>
+        <dd class = "col-sm-9">
+            @Html.DisplayFor(model => model.Campaign.SendBatchDelaySeconds) 秒
+        </dd>
+         <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.CreatedByUser)
+        </dt>
+        <dd class = "col-sm-9">
+            @(Model.Campaign.CreatedByUser?.Email ?? "N/A")
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.CreateTime)
+        </dt>
+        <dd class = "col-sm-9">
+            @Model.Campaign.CreateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.TrackOpens)
+        </dt>
+        <dd class = "col-sm-9">
+            @(Model.Campaign.TrackOpens ? "是" : "否")
+        </dd>
+        <dt class = "col-sm-3">
+            @Html.DisplayNameFor(model => model.Campaign.UpdateTime)
+        </dt>
+        <dd class = "col-sm-9">
+             @Model.Campaign.UpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+    </dl>
+</div>
+
+@* 目標對象管理區塊 *@
+<div class="mt-4">
+    <h4>目標對象</h4>
+    <hr />
+    @* *** 修改：根據是否選擇群組顯示不同提示 *** *@
+    @if(Model.Campaign.TargetGroupId.HasValue)
+    {
+        <p>此活動將自動發送給群組「@(Model.Campaign.TargetGroup?.Name ?? "未知")」的成員。</p>
+        <p><em>(您仍然可以點擊下方按鈕查看或手動管理個別目標狀態，但發送時會以群組成員為主。)</em></p>
+    }
+    else
+    {
+        <p>此活動未指定目標群組，請手動管理目標對象。</p>
+    }
+    <p>
+        <a asp-page="./ManageTargets" asp-route-campaignId="@Model.Campaign.Id" class="btn btn-info">管理目標對象</a>
+    </p>
+</div>
+
+@* 操作按鈕區塊 *@
+<div class="mt-4">
+    <a asp-page="./Edit" asp-route-id="@Model.Campaign.Id" class="btn btn-primary">編輯活動設定</a> |
+
+    @* *** 新增：查看報告按鈕 *** *@
+    <a asp-page="./Results" asp-route-id="@Model.Campaign.Id" class="btn btn-success">查看報告</a> |
+    
+    @* *** 新增：立即發送按鈕的表單 *** *@
+    @if(Model.Campaign.Status == CampaignStatus.Draft) @* 只在草稿狀態顯示 *@
+    {
+        <form method="post" asp-page-handler="SendNow" asp-route-id="@Model.Campaign.Id" style="display: inline;" onsubmit="return confirm('您確定要立即發送此演練活動郵件給所有目標嗎？此操作可能需要一些時間。');">
+            <button type="submit" class="btn btn-success">立即發送</button>
+        </form> @:|
+    }
+    
+    @if(Model.Campaign.Status == CampaignStatus.Running || Model.Campaign.Status == CampaignStatus.Scheduled)
+    {
+        <form method="post" asp-page-handler="EndCampaign" asp-route-id="@Model.Campaign.Id" style="display: inline;" onsubmit="return confirm('您確定要手動結束這個演練活動嗎？');">
+            <button type="submit" class="btn btn-warning">手動結束</button> @* 使用 warning 樣式 *@
+        </form> @:|
+    }
+
+    @* 未來可以加入啟動、取消、查看報告等按鈕 *@
+    @* ... (其他按鈕範例) ... *@
+    <a asp-page="./Index" class="btn btn-secondary">返回列表</a>
+</div>

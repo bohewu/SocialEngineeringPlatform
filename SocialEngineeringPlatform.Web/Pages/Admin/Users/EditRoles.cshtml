@@ -1,0 +1,56 @@
+﻿@page "{userId}"
+@model SocialEngineeringPlatform.Web.Pages.Admin.Users.EditRolesModel
+
+@{
+    ViewData["Title"] = "管理使用者角色";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>使用者：@Model.UserName</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            @* 顯示模型驗證錯誤 *@
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+            @* 隱藏欄位傳遞 UserId *@
+            <input type="hidden" asp-for="UserId" />
+
+            <h5>指派角色：</h5>
+            @if (Model.Roles.Any())
+            {
+                @* 遍歷所有角色，顯示 Checkbox *@
+                @foreach (var roleVM in Model.Roles)
+                {
+                    <div class="form-check mb-2">
+                        @*
+                            Checkbox 的 name 設為 "selectedRoles" 以便後端 List<string> 接收
+                            value 設為角色名稱
+                            checked 屬性根據 ViewModel 決定
+                         *@
+                        <input class="form-check-input" type="checkbox" name="selectedRoles" value="@roleVM.RoleName" id="role_@roleVM.RoleId" checked="@roleVM.IsSelected">
+                        <label class="form-check-label" for="role_@roleVM.RoleId">
+                            @roleVM.RoleName
+                        </label>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>系統中目前沒有定義任何角色。</p>
+            }
+
+            @* 提交與返回按鈕 *@
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">儲存角色變更</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">返回使用者列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

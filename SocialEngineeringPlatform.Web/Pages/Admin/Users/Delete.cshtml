@@ -1,0 +1,54 @@
+﻿@page "{id}"
+@model SocialEngineeringPlatform.Web.Pages.Admin.Users.DeleteModel
+
+@{
+    ViewData["Title"] = "刪除使用者";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (Model.CanDelete)
+{
+    <h3 class="text-danger">警告：您確定要永久刪除這個使用者帳號嗎？</h3>
+    <p class="text-danger">此操作無法復原，且可能導致與此使用者相關的資料（如活動建立者）失去關聯。建議優先考慮鎖定或禁用帳號。</p>
+}
+else
+{
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">無法刪除！</h4>
+        <p>您無法刪除自己的帳號。</p>
+    </div>
+}
+
+<div>
+    <h4>使用者資訊</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.UserToDelete.UserName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.UserToDelete.UserName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.UserToDelete.Email)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.UserToDelete.Email)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.UserToDelete.Id)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.UserToDelete.Id)
+        </dd>
+    </dl>
+
+    @* 刪除確認表單 *@
+    <form method="post">
+        <input type="hidden" asp-for="UserToDelete.Id" />
+        <button type="submit" class="btn btn-danger">確認永久刪除</button> |
+        <a asp-page="./Index" class="btn btn-secondary">取消</a>
+    </form>
+</div>

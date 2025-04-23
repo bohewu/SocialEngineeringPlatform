@@ -1,0 +1,76 @@
+﻿@page
+@model SocialEngineeringPlatform.Web.Pages.TargetUsers.CreateModel
+
+@{
+    ViewData["Title"] = "建立目標使用者";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>目標使用者</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @* 電子郵件 *@
+            <div class="mb-3">
+                <label asp-for="TargetUser.Email" class="form-label"></label>
+                <input asp-for="TargetUser.Email" class="form-control" />
+                <span asp-validation-for="TargetUser.Email" class="text-danger"></span>
+            </div>
+
+            @* 姓名 *@
+            <div class="mb-3">
+                <label asp-for="TargetUser.Name" class="form-label"></label>
+                <input asp-for="TargetUser.Name" class="form-control" />
+                <span asp-validation-for="TargetUser.Name" class="text-danger"></span>
+            </div>
+
+            @* 所屬群組 (下拉選單) *@
+            <div class="mb-3">
+                <label asp-for="TargetUser.GroupId" class="form-label"></label>
+                @* 使用 asp-items 綁定 PageModel 中的 GroupNameSL *@
+                <select asp-for="TargetUser.GroupId" class="form-select" asp-items="Model.GroupNameSL">
+                    @* 加入一個預設的空選項 *@
+                    <option value="">-- 請選擇群組 --</option>
+                </select>
+                @* GroupId 是 nullable int，如果沒選，驗證可能不會報錯，除非加上 [Required] *@
+                <span asp-validation-for="TargetUser.GroupId" class="text-danger"></span>
+            </div>
+
+            @* 自訂欄位 1 *@
+            <div class="mb-3">
+                <label asp-for="TargetUser.CustomField1" class="form-label"></label>
+                <input asp-for="TargetUser.CustomField1" class="form-control" />
+                <span asp-validation-for="TargetUser.CustomField1" class="text-danger"></span>
+            </div>
+
+            @* 自訂欄位 2 *@
+            <div class="mb-3">
+                <label asp-for="TargetUser.CustomField2" class="form-label"></label>
+                <input asp-for="TargetUser.CustomField2" class="form-control" />
+                <span asp-validation-for="TargetUser.CustomField2" class="text-danger"></span>
+            </div>
+
+            @* 啟用狀態 (核取方塊) *@
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" asp-for="TargetUser.IsActive" />
+                <label class="form-check-label" asp-for="TargetUser.IsActive"></label>
+            </div>
+
+
+            @* 提交與返回按鈕 *@
+            <div class="mb-3">
+                <button type="submit" class="btn btn-success">建立</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">返回列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

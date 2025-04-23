@@ -1,0 +1,50 @@
+﻿@page "{id:int?}"
+@model SocialEngineeringPlatform.Web.Pages.TargetGroups.DetailsModel
+
+@{
+    ViewData["Title"] = "目標群組詳細資料";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>目標群組</h4>
+    <hr />
+    @* 使用 Bootstrap 5 的 Definition List (dl) 和 Row/Col 來排版 *@
+    <dl class="row">
+        <dt class="col-sm-2">
+            @* 顯示欄位名稱 (會讀取 Model 的 [Display] Attribute) *@
+            @Html.DisplayNameFor(model => model.TargetGroup.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @* 顯示欄位值 *@
+            @Html.DisplayFor(model => model.TargetGroup.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetGroup.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TargetGroup.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetGroup.CreateTime)
+        </dt>
+        <dd class="col-sm-10">
+            @* 格式化時間顯示 *@
+            @Model.TargetGroup.CreateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TargetGroup.UpdateTime)
+        </dt>
+        <dd class="col-sm-10">
+            @Model.TargetGroup.UpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
+        </dd>
+    </dl>
+</div>
+<div>
+    @* 編輯按鈕，連結到 Edit 頁面，並傳遞目前的 id *@
+    <a asp-page="./Edit" asp-route-id="@Model.TargetGroup.Id" class="btn btn-primary">編輯</a> |
+    @* 返回列表連結 *@
+    <a asp-page="./Index" class="btn btn-secondary">返回列表</a>
+</div>

@@ -1,0 +1,206 @@
+﻿@page "{id:int}"
+@model SocialEngineeringPlatform.Web.Pages.Campaigns.ResultsModel
+@{
+    ViewData["Title"] = $"活動報告 - {Model.Results.Campaign.Name}";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>活動：<strong>@Model.Results.Campaign.Name</strong></p>
+<hr />
+
+@* 統計數據卡片區 *@
+<div class="row mb-4">
+    @* 目標總數 *@
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">@Html.DisplayNameFor(m => m.Results.TotalTargets)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Results.TotalTargets</div>
+                    </div>
+                    <div class="col-auto"><i class="fas fa-users fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+     @* 成功發送數 *@
+     <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                 <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">@Html.DisplayNameFor(m => m.Results.EmailsSent)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Results.EmailsSent</div>
+                    </div>
+                     <div class="col-auto"><i class="fas fa-envelope-circle-check fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+     @* 發送失敗數 *@
+     <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                 <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">@Html.DisplayNameFor(m => m.Results.EmailsFailed)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Results.EmailsFailed</div>
+                    </div>
+                     <div class="col-auto"><i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i></div> @* 更改圖示 *@
+                </div>
+            </div>
+        </div>
+    </div>
+     @* 開啟記錄數 / 開啟率 *@
+     <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                 <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">@Html.DisplayNameFor(m => m.Results.OpensRecorded)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Results.OpensRecorded (@Model.Results.OpenRate.ToString("P1"))</div>
+                    </div>
+                     <div class="col-auto"><i class="fas fa-eye fa-2x text-gray-300"></i></div>
+                </div>
+                 <small class="text-muted">* 開啟率為估計值，可能受圖片阻擋影響</small> @* 強調不準確性 *@
+            </div>
+        </div>
+    </div>
+     @* 點擊記錄數 / 點擊率 *@
+     <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                 <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">@Html.DisplayNameFor(m => m.Results.ClicksRecorded)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Results.ClicksRecorded (@Model.Results.ClickRate.ToString("P1"))</div>
+                    </div>
+                     <div class="col-auto"><i class="fas fa-mouse-pointer fa-2x text-gray-300"></i></div>
+                </div>
+                <small class="text-muted">* 點擊率 = 點擊人數 / 成功發送數</small> @* 說明計算方式 *@
+            </div>
+        </div>
+    </div>
+     @* 提交記錄數 / 提交率 *@
+     <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                 <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">@Html.DisplayNameFor(m => m.Results.SubmissionsRecorded)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Results.SubmissionsRecorded (@Model.Results.SubmissionRate.ToString("P1"))</div>
+                    </div>
+                     <div class="col-auto"><i class="fas fa-file-import fa-2x text-gray-300"></i></div>
+                </div>
+                 <small class="text-muted">* 提交率 = 提交人數 / 成功發送數</small> @* 說明計算方式 *@
+            </div>
+        </div>
+    </div>
+     @* 回報記錄數 *@
+     <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-secondary shadow h-100 py-2">
+            <div class="card-body">
+                 <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">@Html.DisplayNameFor(m => m.Results.ReportsRecorded)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Results.ReportsRecorded</div>
+                    </div>
+                     <div class="col-auto"><i class="fas fa-flag fa-2x text-gray-300"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@* 目標互動詳細列表 *@
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">@Html.DisplayNameFor(m => m.Results.TargetInteractions)</h6>
+        @* *** 新增：匯出按鈕 *** *@
+        <a asp-page-handler="ExportCsv" asp-route-id="@Model.Id" class="btn btn-success btn-sm">
+            <i class="fas fa-file-csv"></i> @* Font Awesome 圖示 (需引入) *@
+            匯出報告 (CSV)
+        </a>
+    </div>
+    <div class="card-body">
+        @if (Model.Results.TargetInteractions.Any())
+        {
+            <div class="table-responsive">
+                <table id="resultsTable" class="table table-bordered table-hover w-100 p-0">
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(m => m.Results.TargetInteractions[0].Email)</th>
+                            <th>@Html.DisplayNameFor(m => m.Results.TargetInteractions[0].Name)</th>
+                            <th>@Html.DisplayNameFor(m => m.Results.TargetInteractions[0].SendStatus)</th>
+                            <th class="text-center">@Html.DisplayNameFor(m => m.Results.TargetInteractions[0].Opened)</th>
+                            <th class="text-center">@Html.DisplayNameFor(m => m.Results.TargetInteractions[0].Clicked)</th>
+                            <th class="text-center">@Html.DisplayNameFor(m => m.Results.TargetInteractions[0].Submitted)</th>
+                            <th class="text-center">@Html.DisplayNameFor(m => m.Results.TargetInteractions[0].Reported)</th>
+                            <th>@Html.DisplayNameFor(m => m.Results.TargetInteractions[0].SentTime)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var target in Model.Results.TargetInteractions)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => target.Email)</td>
+                                <td>@Html.DisplayFor(modelItem => target.Name)</td>
+                                <td>@Html.DisplayFor(modelItem => target.SendStatus)</td>
+                                <td class="text-center">@(target.Opened ? "✔️" : "❌")</td>
+                                <td class="text-center">@(target.Clicked ? "✔️" : "❌")</td>
+                                <td class="text-center">@(target.Submitted ? "✔️" : "❌")</td>
+                                <td class="text-center">@(target.Reported ? "✔️" : "❌")</td>
+                                <td>@(target.SentTime?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p>此活動尚無目標對象或互動記錄。</p>
+        }
+    </div>
+</div>
+
+@* 操作按鈕 *@
+<div class="mt-3">
+    <a asp-page="./Details" asp-route-id="@Model.Id" class="btn btn-secondary ms-2">返回活動詳細</a>
+    <a asp-page="./Index" class="btn btn-secondary ms-2">返回活動列表</a>
+</div>
+
+
+@section Scripts {
+    @{
+        // await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    @* 引用 DataTables.net 的 CSS *@
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.css"/>
+
+    @* 引用 DataTables.net 的 JS *@
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/dt-2.0.5/datatables.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#resultsTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/2.0.5/i18n/zh-HANT.json"
+                },
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "responsive": true,
+                 "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "全部"]], // 顯示數量選項
+                 "order": [[ 0, "asc" ]] // 預設依照 Email 排序
+            });
+        });
+    </script>
+    @* 可以在這裡加入 Font Awesome 的引用 (如果 _Layout.cshtml 沒有的話) *@
+    @* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.x.x/css/all.min.css" ... /> *@
+}

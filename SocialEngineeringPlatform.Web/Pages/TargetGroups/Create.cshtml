@@ -1,0 +1,52 @@
+﻿@page
+@model SocialEngineeringPlatform.Web.Pages.TargetGroups.CreateModel
+
+@{
+    ViewData["Title"] = "建立目標群組";
+    // Layout = "_AdminLayout"; // 可選
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>目標群組</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6"> @* 限制表單寬度 *@
+        <form method="post">
+            @* 顯示模型層級的驗證錯誤 (非欄位特定) *@
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @* 名稱欄位 *@
+            <div class="mb-3">
+                <label asp-for="TargetGroup.Name" class="form-label"></label>
+                <input asp-for="TargetGroup.Name" class="form-control" />
+                @* 顯示 Name 欄位的驗證錯誤訊息 *@
+                <span asp-validation-for="TargetGroup.Name" class="text-danger"></span>
+            </div>
+
+            @* 描述欄位 *@
+            <div class="mb-3">
+                <label asp-for="TargetGroup.Description" class="form-label"></label>
+                @* 使用 textarea 讓描述可以輸入多行 *@
+                <textarea asp-for="TargetGroup.Description" class="form-control" rows="3"></textarea>
+                @* 顯示 Description 欄位的驗證錯誤訊息 *@
+                <span asp-validation-for="TargetGroup.Description" class="text-danger"></span>
+            </div>
+
+            @* 提交按鈕 *@
+            <div class="mb-3">
+                <button type="submit" class="btn btn-success">建立</button>
+                @* 返回列表連結 *@
+                <a asp-page="./Index" class="btn btn-secondary ms-2">返回列表</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@* Script 區塊，用於載入用戶端驗證腳本 *@
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" /> @* 載入 jQuery Unobtrusive Validation 腳本 *@
+    }
+}
