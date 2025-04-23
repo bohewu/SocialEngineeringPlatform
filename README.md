@@ -53,7 +53,7 @@
 
 ## **技術棧**
 
-* **後端:** ASP.NET Core 9 (Razor Pages), Entity Framework Core 8  
+* **後端:** ASP.NET Core 9 (Razor Pages), Entity Framework Core 9  
 * **資料庫:** SQL Server (LocalDB for Development)  
 * **前端:** Bootstrap 5, jQuery, DataTables.net  
 * **郵件:** MailKit  
