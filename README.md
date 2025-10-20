@@ -105,7 +105,7 @@
 
 ## **Credits**
 
-本專案的開發過程大量借助了大型語言模型 **Gemini 2.5 Pro (Google)** 的協助。其貢獻包括但不限於：
+本專案的開發過程大量借助了大型語言模型 **Gemini 2.5 Pro (Google) & Github Copilot AI Agent** 的協助。其貢獻包括但不限於：
 
 * **程式碼撰寫：** 貢獻了超過 90% 的 C\# 後端邏輯、Razor Page 頁面、HTML、CSS 及 JavaScript 程式碼。  
 * **架構設計：** 提供了專案結構、資料庫設計 (ERD)、實作順序規劃等建議。  
