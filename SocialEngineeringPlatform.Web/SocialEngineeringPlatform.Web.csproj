@@ -11,7 +11,9 @@
     <PackageReference Include="AngleSharp" Version="1.3.0" />
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.21" />
-    <PackageReference Include="Hangfire.Storage.SQLite" Version="0.4.2" />
+    <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.20.12" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.21" />
     <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
@@ -28,6 +30,15 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="publish\web.config" />
+    <_ContentIncludedByDefault Remove="publish\appsettings.Development.json" />
+    <_ContentIncludedByDefault Remove="publish\appsettings.json" />
+    <_ContentIncludedByDefault Remove="publish\SocialEngineeringPlatform.Web.deps.json" />
+    <_ContentIncludedByDefault Remove="publish\SocialEngineeringPlatform.Web.runtimeconfig.json" />
+    <_ContentIncludedByDefault Remove="publish\SocialEngineeringPlatform.Web.staticwebassets.endpoints.json" />
   </ItemGroup>
 
 </Project>

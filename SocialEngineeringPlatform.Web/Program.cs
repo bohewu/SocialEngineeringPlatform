@@ -1,3 +1,4 @@
+using Hangfire.PostgreSql; // 支援 Hangfire PostgreSQL
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SocialEngineeringPlatform.Web.Data;
@@ -6,13 +7,11 @@ using SocialEngineeringPlatform.Web.Models.Core;
 using SocialEngineeringPlatform.Web.Services;
 using SocialEngineeringPlatform.Web.Services.Interfaces; // 引用 ApplicationUser
 using Hangfire;
-using Hangfire.Dashboard; // *** 加入 Hangfire using ***
-using Hangfire.Storage.SQLite; // *** 加入 Hangfire SQLite using ***
-using Npgsql.EntityFrameworkCore.PostgreSQL; // *** PostgreSQL 支援 ***
-using Microsoft.Extensions.Diagnostics.HealthChecks; // 健康檢查
+using Hangfire.Dashboard;
+using Hangfire.MemoryStorage;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 
 // *** 新增：註冊資料保護服務 ***
@@ -36,15 +35,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
         case "sqlite":
             // SQLite: 動態計算絕對路徑，確保資料庫與執行檔在同一目錄
-            var sqliteConnStr = builder.Configuration.GetConnectionString("SqliteConnection") 
+            var sqliteConnStr = builder.Configuration.GetConnectionString("SqliteConnection")
                                 ?? builder.Configuration.GetConnectionString("DefaultConnection")
                                 ?? throw new InvalidOperationException("SQLite connection string not found.");
-            
+
             if (sqliteConnStr.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
             {
                 var dataSourcePrefix = "Data Source=";
                 var dbFileName = sqliteConnStr.Substring(dataSourcePrefix.Length).Trim();
-                
+
                 if (!Path.IsPathRooted(dbFileName))
                 {
                     var appBasePath = AppContext.BaseDirectory;
@@ -53,7 +52,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                     Console.WriteLine($"SQLite Database Path: {databasePath}");
                 }
             }
-            
+
             options.UseSqlite(sqliteConnStr);
             break;
 
@@ -76,7 +75,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             break;
 
         default:
-            throw new Exception($"Unsupported database provider: {dbProvider}. Supported providers: Sqlite, SqlServer, Postgres");
+            throw new Exception(
+                $"Unsupported database provider: {dbProvider}. Supported providers: Sqlite, SqlServer, Postgres");
     }
 });
 
@@ -93,7 +93,8 @@ builder.Services
 
 // --- 修改 Identity 設定以使用 ApplicationUser ---
 builder.Services
-    .AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true) // <--- 指定使用 ApplicationUser
+    .AddDefaultIdentity<
+        ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true) // <--- 指定使用 ApplicationUser
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -123,44 +124,46 @@ builder.Services.AddRazorPages()
         // options.Conventions.AuthorizeFolder("/Admin/Users", ApplicationDbContext.RoleAdmin);
         // // *** 新增：限制 /Settings 資料夾需要 Administrator 角色 (預先加入) ***
         // options.Conventions.AuthorizeFolder("/Settings", ApplicationDbContext.RoleAdmin);
-        
+
         options.Conventions.AllowAnonymousToPage("/TrackClick");
         options.Conventions.AllowAnonymousToPage("/TrackLanding");
         options.Conventions.AllowAnonymousToPage("/TrackOpen");
         options.Conventions.AllowAnonymousToPage("/TrackSubmit");
     });
 
-    // *** 新增：設定 Hangfire (根據資料庫提供者) ***
-    var hangfireConnectionString = dbProvider.ToLower() switch
-    {
-        "sqlite" => builder.Configuration.GetConnectionString("SqliteConnection") 
-                    ?? builder.Configuration.GetConnectionString("DefaultConnection")
-                    ?? throw new InvalidOperationException("Hangfire SQLite connection string not found."),
-        "sqlserver" or "mssql" => builder.Configuration.GetConnectionString("SqlServerConnection")
-                                  ?? throw new InvalidOperationException("Hangfire SQL Server connection string not found."),
-        "postgres" or "postgresql" => builder.Configuration.GetConnectionString("PostgresConnection")
-                                       ?? throw new InvalidOperationException("Hangfire PostgreSQL connection string not found."),
-        _ => throw new Exception($"Unsupported Hangfire provider: {dbProvider}")
-    };
-
-    // 如果是 SQLite，需要解析為絕對路徑
-    if (dbProvider.ToLower() == "sqlite" && hangfireConnectionString.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
-    {
-        var dataSourcePrefix = "Data Source=";
-        var dbFileName = hangfireConnectionString.Substring(dataSourcePrefix.Length).Trim();
-        if (!Path.IsPathRooted(dbFileName))
-        {
-            var appBasePath = AppContext.BaseDirectory;
-            var databasePath = Path.Combine(appBasePath, dbFileName);
-            hangfireConnectionString = $"{dataSourcePrefix}{databasePath}";
-        }
-    }
-
-    builder.Services.AddHangfire(configuration => configuration
+// *** 新增：設定 Hangfire (根據資料庫提供者) ***
+builder.Services.AddHangfire(configuration =>
+{
+    configuration
         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
         .UseSimpleAssemblyNameTypeSerializer()
-        .UseRecommendedSerializerSettings()
-        .UseSQLiteStorage(hangfireConnectionString)); // 目前僅支援 SQLite，其他資料庫需額外套件
+        .UseRecommendedSerializerSettings();
+
+    switch (dbProvider.ToLower())
+    {
+        case "sqlite":
+            // SQLite 模式下使用 MemoryStorage
+            configuration.UseMemoryStorage();
+            Console.WriteLine("Hangfire using MemoryStorage (SQLite mode)");
+            break;
+        case "sqlserver":
+        case "mssql":
+            var sqlServerConnStr = builder.Configuration.GetConnectionString("SqlServerConnection")
+                                   ?? throw new InvalidOperationException("Hangfire SQL Server connection string not found.");
+            configuration.UseSqlServerStorage(sqlServerConnStr);
+            Console.WriteLine("Hangfire using SQL Server Storage");
+            break;
+        case "postgres":
+        case "postgresql":
+            var postgresConnStr = builder.Configuration.GetConnectionString("PostgresConnection")
+                                  ?? throw new InvalidOperationException("Hangfire PostgreSQL connection string not found.");
+            configuration.UsePostgreSqlStorage(options => { options.UseNpgsqlConnection(postgresConnStr); });
+            Console.WriteLine("Hangfire using PostgreSQL Storage");
+            break;
+        default:
+            throw new Exception($"Unsupported Hangfire provider: {dbProvider}");
+    }
+});
 
 // *** 新增：啟動 Hangfire 伺服器 ***
 // AddHangfireServer 會在背景啟動處理工作的伺服器
