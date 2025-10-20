@@ -210,13 +210,13 @@ namespace SocialEngineeringPlatform.Web.Services
                     fromDisplayName = !string.IsNullOrWhiteSpace(campaign.MailTemplate.CustomFromDisplayName)
                         ? campaign.MailTemplate.CustomFromDisplayName
                         : fromDisplayName; // 或者設為 null/空字串
-                    _logger.LogDebug("活動 ID: {Cid}, 目標: {Tid} 使用範本自訂寄件者: {From}", campaignId, campaignTarget.TargetUserId, fromAddress);
+                    _logger.LogDebug("活動 ID: {Cid}, 目標: {Tid} 使用範本自訂寄件者", campaignId, campaignTarget.TargetUserId);
                 }
                 else if (!string.IsNullOrWhiteSpace(campaign.MailTemplate.CustomFromDisplayName))
                 {
                     // 如果只自訂了名稱，地址仍然用預設的
                     fromDisplayName = campaign.MailTemplate.CustomFromDisplayName;
-                    _logger.LogDebug("活動 ID: {Cid}, 目標: {Tid} 使用範本自訂寄件者名稱: {FromName}", campaignId, campaignTarget.TargetUserId, fromDisplayName);
+                    _logger.LogDebug("活動 ID: {Cid}, 目標: {Tid} 使用範本自訂寄件者名稱", campaignId, campaignTarget.TargetUserId);
                 }
                 // *** 寄件者資訊決定完畢 ***
                 
@@ -237,7 +237,8 @@ namespace SocialEngineeringPlatform.Web.Services
                             // 這是釣魚連結，且活動設定了登陸頁 -> 產生登陸頁追蹤連結
                             finalUrl =
                                 $"{baseUrl}/Track/Landing?c={campaign.Id}&t={campaignTarget.TargetUserId}"; // 指向新的端點
-                            _logger.LogTrace("釣魚連結替換 -> '{Tracking}'", finalUrl);
+                            _logger.LogTrace("釣魚連結替換為登陸頁追蹤連結。CampaignId={CampaignId}, TargetUserId={TargetUserId}", 
+                                campaign.Id, campaignTarget.TargetUserId);
                         }
                         else if (!string.IsNullOrWhiteSpace(originalHref) &&
                                  Uri.TryCreate(originalHref, UriKind.Absolute, out var uri) &&
@@ -249,13 +250,15 @@ namespace SocialEngineeringPlatform.Web.Services
                                 .TrimEnd('=');
                             finalUrl =
                                 $"{baseUrl}/Track/Click?c={campaign.Id}&t={campaignTarget.TargetUserId}&url={encodedUrl}"; // 指向點擊追蹤端點
-                            _logger.LogTrace("普通連結替換: '{Original}' -> '{Tracking}'", originalHref, finalUrl);
+                            _logger.LogTrace("普通連結替換為點擊追蹤連結。CampaignId={CampaignId}, TargetUserId={TargetUserId}, OriginalScheme={Scheme}", 
+                                campaign.Id, campaignTarget.TargetUserId, uri.Scheme);
                         }
                         else
                         {
                             // 其他連結 (mailto:, #fragment, javascript:, 相對路徑等) 或無效連結 -> 保持原樣
                             finalUrl = originalHref;
-                            _logger.LogTrace("跳過連結 (無效或不需追蹤): '{Original}'", originalHref);
+                            _logger.LogTrace("跳過連結 (無效或不需追蹤)。LinkType={LinkType}", 
+                                string.IsNullOrWhiteSpace(originalHref) ? "empty" : "unsupported");
                         }
 
                         link.SetAttribute("href", finalUrl); // 設定最終的 href

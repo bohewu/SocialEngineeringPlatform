@@ -49,8 +49,7 @@ namespace SocialEngineeringPlatform.Web.Pages
                 originalUrl = Encoding.UTF8.GetString(urlBytes);
                 if (!Uri.TryCreate(originalUrl, UriKind.Absolute, out _))
                 {
-                    _logger.LogWarning("點擊追蹤請求中的 URL 解碼後無效: {OriginalUrl} (Encoded: {EncodedUrl})", originalUrl,
-                        encodedUrl);
+                    _logger.LogWarning("點擊追蹤請求中的 URL 解碼後無效。EncodedUrl: {EncodedUrl}", encodedUrl);
                     // 導向到錯誤頁或首頁
                     return RedirectToPage("/Error", new { message = "Invalid target URL." });
                     // return BadRequest("無效的目標 URL。");
@@ -92,8 +91,12 @@ namespace SocialEngineeringPlatform.Web.Pages
             // 4. 記錄追蹤事件 (僅在狀態為 Running 時)
             try
             {
-                _logger.LogInformation("記錄點擊事件：CampaignId={Cid}, TargetUserId={Tid}, OriginalUrl={Url}",
-                    campaignId.Value, targetUserId.Value, originalUrl);
+                // 只記錄 URL 的 scheme 和 host，避免完整 URL 的日誌注入風險
+                var urlInfo = Uri.TryCreate(originalUrl, UriKind.Absolute, out var parsedUri) 
+                    ? $"{parsedUri.Scheme}://{parsedUri.Host}" 
+                    : "invalid-url";
+                _logger.LogInformation("記錄點擊事件：CampaignId={Cid}, TargetUserId={Tid}, UrlHost={UrlHost}",
+                    campaignId.Value, targetUserId.Value, urlInfo);
                 var trackingEvent = new TrackingEvent
                 {
                     CampaignId = campaignId.Value,
