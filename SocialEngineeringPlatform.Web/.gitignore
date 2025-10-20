@@ -44,6 +44,9 @@ publish/
 *.sqlite-shm
 *.sqlite-wal
 
+# Entity Framework Core Migrations (provider-specific)
+Migrations/
+
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
