@@ -7,7 +7,8 @@ using SocialEngineeringPlatform.Web.Services;
 using SocialEngineeringPlatform.Web.Services.Interfaces; // 引用 ApplicationUser
 using Hangfire;
 using Hangfire.Dashboard; // *** 加入 Hangfire using ***
-using Hangfire.SqlServer; // *** 加入 Hangfire SQL Server using ***
+using Hangfire.Storage.SQLite; // *** 加入 Hangfire SQLite using ***
+using Npgsql.EntityFrameworkCore.PostgreSQL; // *** PostgreSQL 支援 ***
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,13 +25,59 @@ builder.Services.AddDataProtection(); // 使用預設設定 (適用於開發或�
 // *** 新增：註冊設定服務 ***
 builder.Services.AddScoped<ISettingsService, DatabaseSettingsService>();
 
-// --- 修改資料庫設定 ---
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-                       throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+// --- 多資料庫支援配置 ---
+var dbProvider = builder.Configuration.GetValue<string>("DatabaseProvider") ?? "Sqlite";
+Console.WriteLine($"Using Database Provider: {dbProvider}");
 
-// 將 AddDbContext 中的 UseSqlite 改為 UseSqlServer
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString)); // <--- 改成 UseSqlServer
+{
+    switch (dbProvider.ToLower())
+    {
+        case "sqlite":
+            // SQLite: 動態計算絕對路徑，確保資料庫與執行檔在同一目錄
+            var sqliteConnStr = builder.Configuration.GetConnectionString("SqliteConnection") 
+                                ?? builder.Configuration.GetConnectionString("DefaultConnection")
+                                ?? throw new InvalidOperationException("SQLite connection string not found.");
+            
+            if (sqliteConnStr.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
+            {
+                var dataSourcePrefix = "Data Source=";
+                var dbFileName = sqliteConnStr.Substring(dataSourcePrefix.Length).Trim();
+                
+                if (!Path.IsPathRooted(dbFileName))
+                {
+                    var appBasePath = AppContext.BaseDirectory;
+                    var databasePath = Path.Combine(appBasePath, dbFileName);
+                    sqliteConnStr = $"{dataSourcePrefix}{databasePath}";
+                    Console.WriteLine($"SQLite Database Path: {databasePath}");
+                }
+            }
+            
+            options.UseSqlite(sqliteConnStr);
+            break;
+
+        case "sqlserver":
+        case "mssql":
+            // SQL Server
+            var sqlServerConnStr = builder.Configuration.GetConnectionString("SqlServerConnection")
+                                   ?? throw new InvalidOperationException("SQL Server connection string not found.");
+            options.UseSqlServer(sqlServerConnStr);
+            Console.WriteLine("Using SQL Server database");
+            break;
+
+        case "postgres":
+        case "postgresql":
+            // PostgreSQL
+            var postgresConnStr = builder.Configuration.GetConnectionString("PostgresConnection")
+                                  ?? throw new InvalidOperationException("PostgreSQL connection string not found.");
+            options.UseNpgsql(postgresConnStr);
+            Console.WriteLine("Using PostgreSQL database");
+            break;
+
+        default:
+            throw new Exception($"Unsupported database provider: {dbProvider}. Supported providers: Sqlite, SqlServer, Postgres");
+    }
+});
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -77,19 +124,37 @@ builder.Services.AddRazorPages()
         options.Conventions.AllowAnonymousToPage("/TrackSubmit");
     });
 
-// *** 新增：設定 Hangfire ***
-builder.Services.AddHangfire(configuration => configuration
-    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180) // 設定相容性等級
-    .UseSimpleAssemblyNameTypeSerializer()
-    .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(connectionString, new SqlServerStorageOptions // 使用 SQL Server 儲存
+    // *** 新增：設定 Hangfire (根據資料庫提供者) ***
+    var hangfireConnectionString = dbProvider.ToLower() switch
     {
-        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-        QueuePollInterval = TimeSpan.Zero, // 使用 SQL Server 的通知機制，而不是輪詢
-        UseRecommendedIsolationLevel = true,
-        DisableGlobalLocks = true // 建議在高流量環境下啟用
-    }));
+        "sqlite" => builder.Configuration.GetConnectionString("SqliteConnection") 
+                    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+                    ?? throw new InvalidOperationException("Hangfire SQLite connection string not found."),
+        "sqlserver" or "mssql" => builder.Configuration.GetConnectionString("SqlServerConnection")
+                                  ?? throw new InvalidOperationException("Hangfire SQL Server connection string not found."),
+        "postgres" or "postgresql" => builder.Configuration.GetConnectionString("PostgresConnection")
+                                       ?? throw new InvalidOperationException("Hangfire PostgreSQL connection string not found."),
+        _ => throw new Exception($"Unsupported Hangfire provider: {dbProvider}")
+    };
+
+    // 如果是 SQLite，需要解析為絕對路徑
+    if (dbProvider.ToLower() == "sqlite" && hangfireConnectionString.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
+    {
+        var dataSourcePrefix = "Data Source=";
+        var dbFileName = hangfireConnectionString.Substring(dataSourcePrefix.Length).Trim();
+        if (!Path.IsPathRooted(dbFileName))
+        {
+            var appBasePath = AppContext.BaseDirectory;
+            var databasePath = Path.Combine(appBasePath, dbFileName);
+            hangfireConnectionString = $"{dataSourcePrefix}{databasePath}";
+        }
+    }
+
+    builder.Services.AddHangfire(configuration => configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSQLiteStorage(hangfireConnectionString)); // 目前僅支援 SQLite，其他資料庫需額外套件
 
 // *** 新增：啟動 Hangfire 伺服器 ***
 // AddHangfireServer 會在背景啟動處理工作的伺服器
