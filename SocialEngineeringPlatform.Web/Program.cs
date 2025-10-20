@@ -9,6 +9,7 @@ using Hangfire;
 using Hangfire.Dashboard; // *** 加入 Hangfire using ***
 using Hangfire.Storage.SQLite; // *** 加入 Hangfire SQLite using ***
 using Npgsql.EntityFrameworkCore.PostgreSQL; // *** PostgreSQL 支援 ***
+using Microsoft.Extensions.Diagnostics.HealthChecks; // 健康檢查
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +85,11 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddScoped<IMailService, SmtpMailService>();
 builder.Services.AddScoped<ICampaignExecutionService, CampaignExecutionService>();
+
+// Minimal Health Checks
+builder.Services
+    .AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
 // --- 修改 Identity 設定以使用 ApplicationUser ---
 builder.Services
@@ -217,6 +223,9 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 
 app.MapRazorPages();
 app.MapControllers(); // 如果您有 API Controller，也需要 Map
+
+// Health check endpoint
+app.MapHealthChecks("/health");
 
 app.Run();
 
