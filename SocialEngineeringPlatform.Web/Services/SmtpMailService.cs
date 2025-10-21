@@ -117,8 +117,8 @@ namespace SocialEngineeringPlatform.Web.Services
                     // 如果 Username 或解密後密碼為空，則不進行驗證
 
                     _logger.LogInformation("正在嘗試發送郵件至 {Recipient}", MaskEmail(toEmail));
-                    var result = await client.SendAsync(message, CancellationToken.None);
-                    _logger.LogInformation("郵件已成功發送至 {Recipient}。Result: {Result}", MaskEmail(toEmail), result);
+                    await client.SendAsync(message, CancellationToken.None);
+                    _logger.LogInformation("郵件已成功發送至 {Recipient}", MaskEmail(toEmail));
                     await client.DisconnectAsync(true, CancellationToken.None);
                     _logger.LogDebug("Disconnected from SMTP host.");
                     return true;

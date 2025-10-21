@@ -60,7 +60,7 @@ namespace SocialEngineeringPlatform.Web.Data
                 else
                 {
                     logger.LogError(
-                        $"Error creating role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                        $"Error creating role '{roleName}'. Error count: {result.Errors.Count()}");
                 }
             }
             else
@@ -107,13 +107,13 @@ namespace SocialEngineeringPlatform.Web.Data
                     else
                     {
                         logger.LogError(
-                            $"Default admin user '{MaskEmail(adminEmail)}' created but failed to add to role '{ApplicationDbContext.RoleAdmin}': {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
+                            $"Default admin user '{MaskEmail(adminEmail)}' created but failed to add to role '{ApplicationDbContext.RoleAdmin}'. Error count: {addToRoleResult.Errors.Count()}");
                     }
                 }
                 else
                 {
                     logger.LogError(
-                        $"Error creating default admin user '{MaskEmail(adminEmail)}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                        $"Error creating default admin user '{MaskEmail(adminEmail)}'. Error count: {result.Errors.Count()}");
                 }
             }
             else

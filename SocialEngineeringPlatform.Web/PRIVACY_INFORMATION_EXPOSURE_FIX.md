@@ -181,14 +181,64 @@ Data/
 - `SocialEngineeringPlatform.Web/Data/DbInitializer.cs` (Modified - 4 log statements)
 - `SocialEngineeringPlatform.Web/Services/CampaignExecutionService.cs` (Source of data flow)
 
+## Additional Privacy Improvements
+
+### Removed Sensitive Data from Log Output
+
+#### SmtpMailService.cs Line 121
+**Issue**: The `result` object from `SendAsync()` may contain sensitive information (email addresses, subject, body preview)
+
+**Before**:
+```csharp
+_logger.LogInformation("郵件已成功發送至 {Recipient}。Result: {Result}", MaskEmail(toEmail), result);
+```
+
+**After**:
+```csharp
+_logger.LogInformation("郵件已成功發送至 {Recipient}", MaskEmail(toEmail));
+```
+
+#### DbInitializer.cs Error Messages
+**Issue**: Identity error descriptions might contain user-submitted data or sensitive context
+
+**Before**:
+```csharp
+logger.LogError($"Error creating role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+logger.LogError($"Error creating default admin user '{MaskEmail(adminEmail)}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+```
+
+**After**:
+```csharp
+logger.LogError($"Error creating role '{roleName}'. Error count: {result.Errors.Count()}");
+logger.LogError($"Error creating default admin user '{MaskEmail(adminEmail)}'. Error count: {result.Errors.Count()}");
+```
+
+**Rationale**:
+- Error descriptions from Identity framework may contain user input
+- Full error messages can leak implementation details
+- Error count provides sufficient debugging information without exposing sensitive data
+
 ## Compliance Status
-✅ **GitHub CodeScan Alert**: RESOLVED - Email addresses are now masked before logging in all locations
-- ✅ SmtpMailService.cs - 5 instances fixed
-- ✅ DbInitializer.cs - 4 instances fixed
+✅ **GitHub CodeScan Alert**: RESOLVED - All privacy exposures have been addressed
+
+### Summary of Fixes
+| File | Category | Instances Fixed |
+|------|----------|-----------------|
+| SmtpMailService.cs | Email masking | 5 log statements |
+| SmtpMailService.cs | Removed sensitive result | 1 log statement |
+| DbInitializer.cs | Email masking | 4 log statements |
+| DbInitializer.cs | Removed error details | 3 log statements |
+| **Total** | | **13 improvements** |
+
+✅ **Privacy Protection Complete**:
+- Email addresses masked everywhere
+- SMTP result objects removed from logs
+- Identity error details sanitized
+- Only minimal meta-information logged
 
 ---
 
 **Date**: October 21, 2025
 **Issue**: Exposure of Private Information
 **Severity**: Medium
-**Status**: Fixed (All Instances)
+**Status**: Fixed (All Instances) ✅
