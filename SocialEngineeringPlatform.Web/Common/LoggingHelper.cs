@@ -23,13 +23,13 @@ public static class LoggingHelper
         if (atIndex <= 0)
             return "[invalid]";
 
-        // 保留前2個字元和@之後的部分，中間用***替代
+        // 遮蔽全部 local 部分，網域部分只保留首字母
         var localPart = email.Substring(0, atIndex);
-        var domainPart = email.Substring(atIndex);
-        
-        if (localPart.Length <= 2)
-            return $"{localPart[0]}***{domainPart}";
-        
-        return $"{localPart.Substring(0, 2)}***{domainPart}";
+        var domainPart = email.Substring(atIndex + 1); // 獲取 domain 而不包含 '@'
+
+        // 若 domain 有子域，僅顯示首字母
+        var maskedDomain = domainPart.Length > 0 ? domainPart[0] + "***" : "***";
+
+        return $"***@{maskedDomain}";
     }
 }
