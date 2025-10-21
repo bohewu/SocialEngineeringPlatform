@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SocialEngineeringPlatform.Web.Models.Core;
+using static SocialEngineeringPlatform.Web.Common.LoggingHelper;
 
 namespace SocialEngineeringPlatform.Web.Data
 {
@@ -101,23 +102,23 @@ namespace SocialEngineeringPlatform.Web.Data
                     if (addToRoleResult.Succeeded)
                     {
                         logger.LogInformation(
-                            $"Default admin user '{adminEmail}' created successfully and added to role '{ApplicationDbContext.RoleAdmin}'.");
+                            $"Default admin user '{MaskEmail(adminEmail)}' created successfully and added to role '{ApplicationDbContext.RoleAdmin}'.");
                     }
                     else
                     {
                         logger.LogError(
-                            $"Default admin user '{adminEmail}' created but failed to add to role '{ApplicationDbContext.RoleAdmin}': {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
+                            $"Default admin user '{MaskEmail(adminEmail)}' created but failed to add to role '{ApplicationDbContext.RoleAdmin}': {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
                     }
                 }
                 else
                 {
                     logger.LogError(
-                        $"Error creating default admin user '{adminEmail}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                        $"Error creating default admin user '{MaskEmail(adminEmail)}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
                 }
             }
             else
             {
-                logger.LogInformation($"Default admin user '{adminEmail}' already exists.");
+                logger.LogInformation($"Default admin user '{MaskEmail(adminEmail)}' already exists.");
             }
         }
 

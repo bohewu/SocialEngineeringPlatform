@@ -7,6 +7,7 @@ using SocialEngineeringPlatform.Web.Common;
 using SocialEngineeringPlatform.Web.Models.Core;
 using SocialEngineeringPlatform.Web.Services.Interfaces;
 using IMailService = SocialEngineeringPlatform.Web.Services.Interfaces.IMailService;
+using static SocialEngineeringPlatform.Web.Common.LoggingHelper;
 
 namespace SocialEngineeringPlatform.Web.Services
 {
@@ -115,9 +116,9 @@ namespace SocialEngineeringPlatform.Web.Services
                     }
                     // 如果 Username 或解密後密碼為空，則不進行驗證
 
-                    _logger.LogInformation("正在嘗試發送郵件至 {Recipient}", toEmail);
+                    _logger.LogInformation("正在嘗試發送郵件至 {Recipient}", MaskEmail(toEmail));
                     var result = await client.SendAsync(message, CancellationToken.None);
-                    _logger.LogInformation("郵件已成功發送至 {Recipient}。Result: {Result}", toEmail, result);
+                    _logger.LogInformation("郵件已成功發送至 {Recipient}。Result: {Result}", MaskEmail(toEmail), result);
                     await client.DisconnectAsync(true, CancellationToken.None);
                     _logger.LogDebug("Disconnected from SMTP host.");
                     return true;
@@ -126,7 +127,7 @@ namespace SocialEngineeringPlatform.Web.Services
             // 捕捉 MailKit 特定的例外
             catch (AuthenticationException authEx)
             {
-                _logger.LogError(authEx, "SMTP 驗證失敗 (使用者名稱/密碼錯誤?) for user {Username}", smtpSettings.Username);
+                _logger.LogError(authEx, "SMTP 驗證失敗 (使用者名稱/密碼錯誤?) for user {Username}. Failed to send to recipient {Recipient}", smtpSettings.Username, MaskEmail(toEmail));
                 return false;
             }
             catch (ServiceNotConnectedException sncEx)
@@ -137,13 +138,13 @@ namespace SocialEngineeringPlatform.Web.Services
             catch (SmtpCommandException smtpCmdEx) // MailKit 的 SmtpException 在 MailKit.Net.Smtp 命名空間
             {
                 _logger.LogError(smtpCmdEx,
-                    "發送郵件至 {Recipient} 時發生 SMTP 命令錯誤。StatusCode: {StatusCode}, Mailbox: {Mailbox}", toEmail,
+                    "發送郵件至 {Recipient} 時發生 SMTP 命令錯誤。StatusCode: {StatusCode}, Mailbox: {Mailbox}", MaskEmail(toEmail),
                     smtpCmdEx.StatusCode, smtpCmdEx.Mailbox?.Address);
                 return false;
             }
             catch (Exception ex) // 捕捉其他可能的例外
             {
-                _logger.LogError(ex, "發送郵件至 {Recipient} 時發生未預期的錯誤。", toEmail);
+                _logger.LogError(ex, "發送郵件至 {Recipient} 時發生未預期的錯誤。", MaskEmail(toEmail));
                 return false;
             }
         }
